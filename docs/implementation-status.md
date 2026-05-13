@@ -21,7 +21,7 @@
 - Lesson selection and lock/unlock behavior
 - Quiz choices with immediate feedback
 - XP, streak, progress counter, and reset
-- Practice notes saved in browser `localStorage`
+- Practice notes saved per lesson in browser `localStorage`
 
 ## Next Phase
 

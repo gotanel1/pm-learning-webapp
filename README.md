@@ -12,7 +12,7 @@
 - Unlock บทถัดไปหลังตอบถูก
 - XP / streak / progress counter
 - Quiz พร้อม feedback ทันที
-- Practice textarea บันทึกใน browser `localStorage`
+- Practice textarea แยกตามบทเรียนและบันทึกใน browser `localStorage`
 - 30-day mission checklist
 - Reset progress
 

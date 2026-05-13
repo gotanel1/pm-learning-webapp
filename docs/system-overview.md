@@ -63,7 +63,7 @@ type SavedState = {
   completedIds: string[];
   xp: number;
   streak: number;
-  lastPractice: string;
+  practiceNotes: Record<string, string>;
 };
 ```
 
@@ -78,7 +78,7 @@ type SavedState = {
 - XP จากการตอบถูกครั้งแรกของ lesson
 - Streak แบบ prototype
 - Progress counter
-- Practice note ที่เก็บใน `localStorage`
+- Practice notes แยกตาม lesson และเก็บใน `localStorage`
 - Reset progress
 
 ## Gaps From PRD
