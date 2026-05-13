@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PM Quest — 30-Day Developer to PM Trainer",
+  title: "PM Learning Webapp — PM Quest",
   description:
-    "30-day Duolingo-style Thai learning app for developers who want to build Product Manager skills.",
+    "Duolingo-style Thai learning app for beginners who want to build professional PM skills.",
 };
 
 export default function RootLayout({

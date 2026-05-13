@@ -1,11 +1,10 @@
-# PM Quest — Developer to PM Trainer
+# PM Learning Webapp
 
-เว็บฝึกทักษะ Product Management สำหรับ Developer สไตล์ Duolingo: ปูพื้นทีละวัน, มีคำถาม, feedback, XP, progress, mission และ Practice Box สำหรับฝึกเขียนจริง
+เว็บแอปฝึกทักษะ PM สำหรับผู้เริ่มจากศูนย์ สไตล์ Duolingo: เรียนสั้น ทำ quiz รับ feedback เก็บ XP/streak และฝึก mission ที่จำลองงาน PM จริง
 
-## Preview
+## Current Product Shape
 
-- Local: http://127.0.0.1:3108/
-- Public VPS: http://37.60.233.88:3108/
+แบรนด์หน้าแอปตอนนี้ใช้ชื่อ `PM Quest` เป็น prototype ของ MVP ตาม PRD โดยมี 30-day learning path และบันทึก progress ใน browser ผ่าน `localStorage`
 
 ## Features
 
@@ -16,6 +15,13 @@
 - Practice textarea บันทึกใน browser `localStorage`
 - 30-day mission checklist
 - Reset progress
+
+## Product Docs
+
+- PRD: [docs/prd-pm-duolingo-webapp.md](docs/prd-pm-duolingo-webapp.md)
+- Tech Lead plan: [docs/tech-lead-implementation-plan.md](docs/tech-lead-implementation-plan.md)
+- System overview: [docs/system-overview.md](docs/system-overview.md)
+- Agent guide: [AGENTS.md](AGENTS.md)
 
 ## Curriculum
 
@@ -53,22 +59,36 @@
 ## Run locally
 
 ```bash
-export PATH=/root/.hermes/node/bin:$PATH
 npm install
-npm run dev -- --hostname 0.0.0.0 --port 3108
+npm run dev
 ```
 
-## Production preview
+Local app: http://localhost:3000
+
+## Quality Checks
 
 ```bash
-export PATH=/root/.hermes/node/bin:$PATH
+npm run lint
+npm run typecheck
 npm run build
-npm run start -- --hostname 0.0.0.0 --port 3108
 ```
 
-## Next ideas
+หรือรันครบชุด:
 
-- เพิ่ม AI grader ตรวจ mini PRD และ Practice Box
-- เพิ่ม badge/achievement และ daily streak ตามวันที่จริง
-- เพิ่ม backend/account ถ้าต้องการเก็บ progress ข้ามเครื่อง
-- เพิ่ม team dashboard สำหรับติดตามหลายคน
+```bash
+npm run check
+```
+
+## Deployment Preview
+
+```bash
+npm run build
+npm run start
+```
+
+## Next Implementation Steps
+
+- แยก domain logic สำหรับ progress, reward และ unlock rules ออกจาก UI
+- เพิ่ม auth/onboarding ตาม PRD
+- เพิ่ม seed content สำหรับ 3 beginner modules ใน format ที่ backend ใช้ต่อได้
+- เพิ่ม dashboard/profile API เมื่อเริ่ม backend foundation
