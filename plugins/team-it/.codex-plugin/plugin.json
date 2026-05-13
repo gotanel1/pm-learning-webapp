@@ -1,0 +1,41 @@
+{
+  "name": "team-it",
+  "version": "0.1.0",
+  "description": "An IT delivery team plugin with role-based skills from planning through testing and deployment.",
+  "author": {
+    "name": "OpenAI Codex",
+    "email": "noreply@example.com",
+    "url": "https://openai.com"
+  },
+  "homepage": "https://openai.com",
+  "repository": "https://openai.com",
+  "license": "MIT",
+  "keywords": [
+    "team",
+    "project-management",
+    "software-delivery",
+    "qa",
+    "devops"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Team IT",
+    "shortDescription": "Cross-functional software delivery roles for Codex.",
+    "longDescription": "Role-based skills for running software delivery work from scoping and architecture through implementation, testing, release, and deployment.",
+    "developerName": "OpenAI Codex",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://openai.com",
+    "privacyPolicyURL": "https://openai.com/policies/privacy-policy/",
+    "termsOfServiceURL": "https://openai.com/policies/terms-of-use/",
+    "defaultPrompt": [
+      "Use Team IT to break a feature into PM, dev, QA, and deploy tasks.",
+      "Use the PM and architect roles to scope a new internal system.",
+      "Use QA and deploy roles to prepare release validation."
+    ],
+    "brandColor": "#0F766E"
+  }
+}

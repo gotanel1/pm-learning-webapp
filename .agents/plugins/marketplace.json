@@ -1,0 +1,20 @@
+{
+  "name": "local-team-marketplace",
+  "interface": {
+    "displayName": "Local Team Marketplace"
+  },
+  "plugins": [
+    {
+      "name": "team-it",
+      "source": {
+        "source": "local",
+        "path": "./plugins/team-it"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
