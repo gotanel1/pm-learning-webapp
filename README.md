@@ -20,6 +20,8 @@
 
 - PRD: [docs/prd-pm-duolingo-webapp.md](docs/prd-pm-duolingo-webapp.md)
 - Tech Lead plan: [docs/tech-lead-implementation-plan.md](docs/tech-lead-implementation-plan.md)
+- System overview: [docs/system-overview.md](docs/system-overview.md)
+- Agent guide: [AGENTS.md](AGENTS.md)
 
 ## Curriculum
 
