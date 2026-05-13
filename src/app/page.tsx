@@ -6,6 +6,11 @@ import {
   getProgressPercent,
   isLessonUnlocked,
 } from "@/domain/progress";
+import {
+  getPracticeNote,
+  normalizeSavedState,
+  savePracticeNote,
+} from "@/domain/practice";
 import { completeLesson } from "@/domain/rewards";
 import type { SavedState } from "@/domain/types";
 import { lessons, type Lesson } from "./lessons";
@@ -17,8 +22,22 @@ const starterState: SavedState = {
   completedIds: [],
   xp: 0,
   streak: 1,
-  lastPractice: "",
+  practiceNotes: {},
 };
+
+function loadInitialState(): SavedState {
+  if (typeof window === "undefined") return starterState;
+
+  try {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    return saved
+      ? normalizeSavedState(JSON.parse(saved), starterState)
+      : starterState;
+  } catch (error) {
+    console.warn("Failed to load saved progress.", error);
+    return starterState;
+  }
+}
 
 function getInitials(title: string) {
   return title
@@ -30,25 +49,16 @@ function getInitials(title: string) {
 }
 
 export default function Home() {
-  const [state, setState] = useState<SavedState>(starterState);
+  const [state, setState] = useState<SavedState>(loadInitialState);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     try {
-      const saved = window.localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        setState({ ...starterState, ...JSON.parse(saved) });
-      }
-    } finally {
-      setIsLoaded(true);
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (error) {
+      console.warn("Failed to save progress.", error);
     }
-  }, []);
-
-  useEffect(() => {
-    if (!isLoaded) return;
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [state, isLoaded]);
+  }, [state]);
 
   const completedSet = useMemo(
     () => new Set(state.completedIds),
@@ -66,6 +76,7 @@ export default function Home() {
     selectedChoice,
     completedSet.has(activeLesson.id),
   );
+  const activePracticeNote = getPracticeNote(state, activeLesson.id);
 
   function selectLesson(lesson: Lesson) {
     const lessonIndex = lessons.findIndex((item) => item.id === lesson.id);
@@ -99,7 +110,7 @@ export default function Home() {
   }
 
   function savePractice(value: string) {
-    setState((current) => ({ ...current, lastPractice: value }));
+    setState((current) => savePracticeNote(current, activeLesson.id, value));
   }
 
   return (
@@ -313,7 +324,7 @@ export default function Home() {
                 <h3 className="mt-2 text-xl font-black">โจทย์ลงมือทำ</h3>
                 <p className="mt-3 leading-7 text-slate-200">{activeLesson.practice}</p>
                 <textarea
-                  value={state.lastPractice}
+                  value={activePracticeNote}
                   onChange={(event) => savePractice(event.target.value)}
                   placeholder="พิมพ์คำตอบ/โน้ตของคุณตรงนี้ ระบบจะจำไว้ในเครื่องนี้"
                   className="mt-4 min-h-36 w-full resize-none rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm leading-6 text-white outline-none ring-lime-300/30 placeholder:text-slate-500 focus:border-lime-300/60 focus:ring-4"
@@ -327,7 +338,7 @@ export default function Home() {
                 <h3 className="mt-2 text-xl font-black">ภารกิจวันนี้</h3>
                 <ul className="mt-4 space-y-3 text-sm text-slate-200">
                   <MissionItem done={state.completedIds.length >= 1} text="จบบทเรียนอย่างน้อย 1 บท" />
-                  <MissionItem done={state.lastPractice.length >= 80} text="เขียน practice note อย่างน้อย 80 ตัวอักษร" />
+                  <MissionItem done={activePracticeNote.length >= 80} text="เขียน practice note อย่างน้อย 80 ตัวอักษร" />
                   <MissionItem done={progressPercent >= 30} text="ทำ path ให้ครบ 30% (9 บทแรก)" />
                 </ul>
               </div>

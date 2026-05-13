@@ -35,7 +35,7 @@ export type SavedState = {
   completedIds: string[];
   xp: number;
   streak: number;
-  lastPractice: string;
+  practiceNotes: Record<string, string>;
 };
 
 export type AnswerLabel = "A" | "B" | "C" | "D";

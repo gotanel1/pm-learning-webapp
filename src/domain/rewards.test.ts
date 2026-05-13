@@ -7,7 +7,7 @@ const baseState: SavedState = {
   completedIds: [],
   xp: 0,
   streak: 1,
-  lastPractice: "",
+  practiceNotes: {},
 };
 
 describe("reward rules", () => {
