@@ -2,8 +2,8 @@
 
 ## Current Branch
 
-- Branch: `feature/app-foundation`
-- Phase: App foundation
+- Branch: `feature/domain-logic-tests`
+- Phase: Domain logic and unit tests
 - GitHub repo: `gotanel1/pm-learning-webapp`
 
 ## Completed
@@ -12,6 +12,8 @@
 - PRD and Tech Lead implementation plan are committed.
 - Existing Next.js prototype is installed, linted, and build-verified.
 - Project naming, scripts, README, env example, and deployment service references are aligned with `pm-learning-webapp`.
+- Domain modules now cover lesson choice building, progress/unlock rules, reward completion, and shared types.
+- Vitest unit tests cover answer distribution, unlock behavior, reward duplication, progress percent, and next-step gating.
 
 ## Current App Capabilities
 
@@ -23,8 +25,8 @@
 
 ## Next Phase
 
-Start `auth + onboarding` or first refactor domain logic out of the one-page prototype:
+Start `auth + onboarding` after this branch is merged:
 
-- Extract progress, reward, and unlock rules into testable modules.
-- Add unit tests for scoring and unlock behavior.
-- Then wire onboarding and user preferences into the app.
+- Add onboarding and user preferences.
+- Keep the `localStorage` migration stable until auth/persistence is designed.
+- Preserve the tested domain rules when introducing backend persistence.
