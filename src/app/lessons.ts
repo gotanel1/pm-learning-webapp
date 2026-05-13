@@ -967,16 +967,39 @@ const lessonSeeds: LessonSeed[] = [
   },
 ];
 
-export const lessons: Lesson[] = lessonSeeds.map((lesson) => {
-  const { answer, answerFeedback, distractors, ...baseLesson } = lesson;
+const correctAnswerSlots = [0, 2, 3, 1] as const;
 
+function buildChoices(lesson: LessonSeed, lessonIndex: number): Choice[] {
+  const { answer, answerFeedback, distractors } = lesson;
+
+  const choices: Choice[] = distractors.map((distractor) => ({
+    text: distractor.text,
+    correct: false,
+    feedback: distractor.feedback,
+  }));
+
+  choices.splice(correctAnswerSlots[lessonIndex % correctAnswerSlots.length], 0, {
+    text: answer,
+    correct: true,
+    feedback: answerFeedback,
+  });
+
+  return choices;
+}
+
+export const lessons: Lesson[] = lessonSeeds.map((lesson, lessonIndex) => {
   return {
-    ...baseLesson,
-    choices: [
-      { text: distractors[0].text, correct: false, feedback: distractors[0].feedback },
-      { text: answer, correct: true, feedback: answerFeedback },
-      { text: distractors[1].text, correct: false, feedback: distractors[1].feedback },
-      { text: distractors[2].text, correct: false, feedback: distractors[2].feedback },
-    ],
+    id: lesson.id,
+    title: lesson.title,
+    level: lesson.level,
+    minutes: lesson.minutes,
+    xp: lesson.xp,
+    theme: lesson.theme,
+    objective: lesson.objective,
+    concept: lesson.concept,
+    coachNote: lesson.coachNote,
+    prompt: lesson.prompt,
+    practice: lesson.practice,
+    choices: buildChoices(lesson, lessonIndex),
   };
 });
