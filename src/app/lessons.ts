@@ -1,34 +1,7 @@
-export type Choice = {
-  text: string;
-  correct: boolean;
-  feedback: string;
-};
+import { buildChoices } from "@/domain/lessons";
+import type { Lesson, LessonSeed } from "@/domain/types";
 
-export type Lesson = {
-  id: string;
-  title: string;
-  level: string;
-  minutes: number;
-  xp: number;
-  theme: string;
-  objective: string;
-  concept: string;
-  coachNote: string;
-  prompt: string;
-  choices: Choice[];
-  practice: string;
-};
-
-type Distractor = {
-  text: string;
-  feedback: string;
-};
-
-type LessonSeed = Omit<Lesson, "choices"> & {
-  answer: string;
-  answerFeedback: string;
-  distractors: [Distractor, Distractor, Distractor];
-};
+export type { Choice, Lesson } from "@/domain/types";
 
 const lessonSeeds: LessonSeed[] = [
   {
@@ -966,26 +939,6 @@ const lessonSeeds: LessonSeed[] = [
       "ทำ Capstone: เขียน PRD 1 หน้า + roadmap 3 phase + handoff to Tech Lead สำหรับ product ที่คุณอยากสร้างจริง",
   },
 ];
-
-const correctAnswerSlots = [0, 2, 3, 1] as const;
-
-function buildChoices(lesson: LessonSeed, lessonIndex: number): Choice[] {
-  const { answer, answerFeedback, distractors } = lesson;
-
-  const choices: Choice[] = distractors.map((distractor) => ({
-    text: distractor.text,
-    correct: false,
-    feedback: distractor.feedback,
-  }));
-
-  choices.splice(correctAnswerSlots[lessonIndex % correctAnswerSlots.length], 0, {
-    text: answer,
-    correct: true,
-    feedback: answerFeedback,
-  });
-
-  return choices;
-}
 
 export const lessons: Lesson[] = lessonSeeds.map((lesson, lessonIndex) => {
   return {

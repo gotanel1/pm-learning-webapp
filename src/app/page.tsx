@@ -1,15 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import {
+  canMoveNext,
+  getProgressPercent,
+  isLessonUnlocked,
+} from "@/domain/progress";
+import { completeLesson } from "@/domain/rewards";
+import type { SavedState } from "@/domain/types";
 import { lessons, type Lesson } from "./lessons";
-
-type SavedState = {
-  activeLessonId: string;
-  completedIds: string[];
-  xp: number;
-  streak: number;
-  lastPractice: string;
-};
 
 const STORAGE_KEY = "pm-duolingo-progress-v2";
 
@@ -62,15 +61,19 @@ export default function Home() {
   const completedCount = state.completedIds.length;
   const selectedChoice =
     selectedIndex === null ? null : activeLesson.choices[selectedIndex];
-  const progressPercent = Math.round(
-    (completedCount / totalLessons) * 100,
+  const progressPercent = getProgressPercent(completedCount, totalLessons);
+  const canGoNext = canMoveNext(
+    selectedChoice,
+    completedSet.has(activeLesson.id),
   );
-  const canMoveNext = selectedChoice?.correct || completedSet.has(activeLesson.id);
 
   function selectLesson(lesson: Lesson) {
     const lessonIndex = lessons.findIndex((item) => item.id === lesson.id);
-    const previousDone = lessonIndex === 0 || completedSet.has(lessons[lessonIndex - 1].id);
-    const isUnlocked = previousDone || completedSet.has(lesson.id);
+    const isUnlocked = isLessonUnlocked(
+      lessonIndex,
+      state.completedIds,
+      lessons,
+    );
     if (!isUnlocked) return;
     setState((current) => ({ ...current, activeLessonId: lesson.id }));
     setSelectedIndex(null);
@@ -80,12 +83,7 @@ export default function Home() {
     setSelectedIndex(index);
     const choice = activeLesson.choices[index];
     if (!choice.correct || completedSet.has(activeLesson.id)) return;
-    setState((current) => ({
-      ...current,
-      completedIds: [...current.completedIds, activeLesson.id],
-      xp: current.xp + activeLesson.xp,
-      streak: Math.max(current.streak, current.completedIds.length + 1),
-    }));
+    setState((current) => completeLesson(current, activeLesson));
   }
 
   function goNext() {
@@ -150,8 +148,11 @@ export default function Home() {
             <div className="max-h-[72vh] space-y-3 overflow-y-auto pr-1">
               {lessons.map((lesson, index) => {
                 const isDone = completedSet.has(lesson.id);
-                const previousDone = index === 0 || completedSet.has(lessons[index - 1].id);
-                const isUnlocked = previousDone || isDone;
+                const isUnlocked = isLessonUnlocked(
+                  index,
+                  state.completedIds,
+                  lessons,
+                );
                 const isActive = lesson.id === activeLesson.id;
                 return (
                   <button
@@ -295,7 +296,7 @@ export default function Home() {
                   </p>
                   <button
                     onClick={goNext}
-                    disabled={!canMoveNext || activeIndex === lessons.length - 1}
+                    disabled={!canGoNext || activeIndex === lessons.length - 1}
                     className="rounded-full bg-lime-400 px-6 py-3 font-black text-slate-950 shadow-lg shadow-lime-400/20 transition hover:-translate-y-0.5 hover:bg-lime-300 disabled:cursor-not-allowed disabled:bg-slate-600 disabled:text-slate-300 disabled:shadow-none"
                   >
                     ไปบทถัดไป →

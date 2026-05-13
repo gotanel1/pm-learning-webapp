@@ -11,6 +11,7 @@
 - `src/app/layout.tsx`: root layout, metadata, font setup
 - `src/app/page.tsx`: client-side app สำหรับ learning path, quiz, feedback, XP/streak, progress และ practice note
 - `src/app/lessons.ts`: seed content ของบทเรียน 30 วัน พร้อมคำถาม ตัวเลือก feedback และ practice prompt
+- `src/domain/`: domain logic สำหรับ lesson choices, progress, rewards และ shared types
 - `src/app/globals.css`: global styles, Tailwind CSS import, focus/selection styles
 - `public/`: static assets จาก Next scaffold
 
@@ -94,16 +95,16 @@ type SavedState = {
 - ยังไม่มี automated tests
 - ยังไม่มี admin/content manager workflow
 
-## Recommended Next Architecture Step
+## Domain Logic
 
-ก่อนเพิ่ม auth หรือ backend ควรแยก domain logic ออกจาก `src/app/page.tsx` เพื่อให้ test ได้:
+Domain logic ถูกแยกออกจากหน้า UI แล้วบางส่วน:
 
-- `progress` rules: lesson availability, completion, retry state
-- `reward` rules: XP, streak, level
-- `quiz` rules: selected answer, correct answer, feedback, pass/fail
-- `content` rules: learning path/module/lesson mapping
+- `src/domain/lessons.ts`: สร้าง choices และกระจายตำแหน่งคำตอบถูก
+- `src/domain/progress.ts`: lesson unlock, progress percent และ next-step gating
+- `src/domain/rewards.ts`: complete lesson, XP และ streak rules
+- `src/domain/types.ts`: shared types ระหว่าง app และ domain
 
-หลังจากนั้นค่อยต่อ onboarding, auth และ persistence
+ขั้นถัดไปคือเพิ่ม onboarding/auth โดยอิง domain rules ที่ test แล้ว ไม่ย้าย logic กลับเข้า UI
 
 ## Development Commands
 
@@ -130,6 +131,7 @@ http://localhost:3000
 ```bash
 npm run lint
 npm run typecheck
+npm run test
 npm run build
 ```
 
