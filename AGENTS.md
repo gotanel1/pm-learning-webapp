@@ -146,6 +146,9 @@ Expected result: `200`
 - Keep Thai learner-facing copy clear and beginner-friendly.
 - Preserve current working behavior unless intentionally changing it.
 - Avoid adding paid services or external vendors without an explicit decision.
+- Wrap every API call in `try/catch` or an equivalent typed error-handling path.
+- Use `try/catch` around functions that can reasonably fail, such as JSON parsing, storage access, network calls, file IO, auth/session work, database operations, and third-party SDK calls.
+- Never swallow errors silently. Return a safe fallback, surface a user-friendly message when relevant, and keep enough detail for debugging.
 
 ## Frontend Guidelines
 
@@ -200,6 +203,7 @@ Before opening or updating a PR:
 - `npm run lint` passes when code changed
 - `npm run typecheck` passes when TypeScript changed
 - `npm run build` passes for app behavior or config changes
+- API calls and failure-prone functions have explicit error handling
 - PR body includes summary, verification, and known risks
 - Any skipped check is explained honestly
 
