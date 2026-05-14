@@ -4,6 +4,7 @@ import {
   normalizeSavedState,
   savePracticeNote,
 } from "./practice";
+import { DEFAULT_PREFERENCES } from "./preferences";
 import type { SavedState } from "./types";
 
 const fallback: SavedState = {
@@ -12,6 +13,8 @@ const fallback: SavedState = {
   xp: 0,
   streak: 1,
   practiceNotes: {},
+  onboardingCompleted: false,
+  preferences: DEFAULT_PREFERENCES,
 };
 
 describe("practice notes", () => {
@@ -47,5 +50,27 @@ describe("practice notes", () => {
     expect(migrated.completedIds).toEqual(["lesson-1"]);
     expect(migrated.xp).toBe(20);
     expect(migrated.streak).toBe(2);
+  });
+
+  it("migrates saved onboarding state and preferences", () => {
+    const migrated = normalizeSavedState(
+      {
+        activeLessonId: "lesson-1",
+        onboardingCompleted: true,
+        preferences: {
+          experienceLevel: "builder",
+          learningGoal: "build-own-product",
+          dailyTarget: 3,
+        },
+      },
+      fallback,
+    );
+
+    expect(migrated.onboardingCompleted).toBe(true);
+    expect(migrated.preferences).toEqual({
+      experienceLevel: "builder",
+      learningGoal: "build-own-product",
+      dailyTarget: 3,
+    });
   });
 });

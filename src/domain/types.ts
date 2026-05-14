@@ -36,8 +36,26 @@ export type SavedState = {
   xp: number;
   streak: number;
   practiceNotes: Record<string, string>;
+  onboardingCompleted: boolean;
+  preferences: UserPreferences;
 };
 
 export type AnswerLabel = "A" | "B" | "C" | "D";
 
 export type AnswerDistribution = Record<AnswerLabel, number>;
+
+export type ExperienceLevel = "zero" | "junior" | "career-switcher" | "builder";
+
+export type LearningGoal =
+  | "become-pm"
+  | "work-with-tech-team"
+  | "build-own-product"
+  | "improve-delivery";
+
+export type DailyTarget = 1 | 2 | 3;
+
+export type UserPreferences = {
+  experienceLevel: ExperienceLevel;
+  learningGoal: LearningGoal;
+  dailyTarget: DailyTarget;
+};

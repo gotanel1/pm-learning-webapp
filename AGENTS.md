@@ -21,9 +21,10 @@
 - Content seed: `src/app/lessons.ts`
 - Styling: Tailwind CSS v4 ผ่าน `src/app/globals.css`
 - Current storage: browser `localStorage`
-- Current app state: prototype ที่ทำ learning loop ได้ในหน้าเดียว
+- Current app state: prototype ที่ทำ onboarding, learner preferences และ learning loop ได้ในหน้าเดียว
 
-ยังไม่มี backend, database, auth จริง, server API, test suite หรือ production analytics provider ในรอบนี้
+ยังไม่มี backend, database, auth จริง, server API หรือ production analytics provider ในรอบนี้
+มี unit tests สำหรับ domain logic ด้วย Vitest
 
 ## Next.js 16 Rule
 
@@ -184,8 +185,9 @@ When adding features, protect these core product expectations:
 
 ## File Map
 
-- `src/app/page.tsx`: current one-page learning app
+- `src/app/page.tsx`: current one-page learning app with onboarding
 - `src/app/lessons.ts`: 30-day lesson seed content and quiz choices
+- `src/domain/`: testable domain rules for lessons, progress, rewards, practice notes, and preferences
 - `src/app/layout.tsx`: metadata and root layout
 - `src/app/globals.css`: Tailwind import and global tokens
 - `docs/prd-pm-duolingo-webapp.md`: product requirements

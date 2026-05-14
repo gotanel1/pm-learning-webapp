@@ -2,8 +2,8 @@
 
 ## Current Branch
 
-- Branch: `feature/domain-logic-tests`
-- Phase: Domain logic and unit tests
+- Branch: `codex/onboarding-user-preferences`
+- Phase: Onboarding and user preferences
 - GitHub repo: `gotanel1/pm-learning-webapp`
 
 ## Completed
@@ -14,6 +14,9 @@
 - Project naming, scripts, README, env example, and deployment service references are aligned with `pm-learning-webapp`.
 - Domain modules now cover lesson choice building, progress/unlock rules, reward completion, and shared types.
 - Vitest unit tests cover answer distribution, unlock behavior, reward duplication, progress percent, and next-step gating.
+- Practice notes are saved per lesson and legacy `lastPractice` data migrates into the active lesson note.
+- Onboarding captures learner experience level, primary learning goal, and daily lesson target.
+- User preferences are normalized through domain logic and stored with progress in the existing `localStorage` state.
 
 ## Current App Capabilities
 
@@ -22,11 +25,13 @@
 - Quiz choices with immediate feedback
 - XP, streak, progress counter, and reset
 - Practice notes saved per lesson in browser `localStorage`
+- First-run onboarding for learner preferences
+- Learner Plan panel for reviewing and editing preferences
 
 ## Next Phase
 
-Start `auth + onboarding` after this branch is merged:
+Start `auth/session` after this branch is merged:
 
-- Add onboarding and user preferences.
 - Keep the `localStorage` migration stable until auth/persistence is designed.
 - Preserve the tested domain rules when introducing backend persistence.
+- Add analytics event abstraction before sending product events to a vendor.
