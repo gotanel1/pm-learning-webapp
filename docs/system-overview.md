@@ -11,7 +11,7 @@
 - `src/app/layout.tsx`: root layout, metadata, font setup
 - `src/app/page.tsx`: client-side app สำหรับ guest profile, onboarding, learning path, quiz, feedback, XP/streak, progress และ practice note
 - `src/app/lessons.ts`: seed content ของบทเรียน 30 วัน พร้อมคำถาม ตัวเลือก feedback และ practice prompt
-- `src/domain/`: domain logic สำหรับ lesson choices, progress, rewards, practice notes, user preferences, learner session และ shared types
+- `src/domain/`: domain logic สำหรับ lesson choices, progress, rewards, practice notes, user preferences, learner session, analytics events และ shared types
 - `src/app/globals.css`: global styles, Tailwind CSS import, focus/selection styles
 - `public/`: static assets จาก Next scaffold
 
@@ -31,6 +31,7 @@
 8. ถ้าตอบถูก ระบบเพิ่ม lesson id เข้า `completedIds`, เพิ่ม XP และปรับ streak
 9. state ถูกเขียนกลับเข้า `localStorage`
 10. ผู้ใช้สามารถไปบทถัดไป เขียน practice note ปรับ Learner Plan หรือแก้ display name ได้
+11. action สำคัญของ learning loop จะเรียก analytics abstraction และส่ง event เข้า dev console
 
 ## Current Data Shape
 
@@ -100,6 +101,20 @@ type LearnerProfile = {
 };
 ```
 
+### `AnalyticsEvent`
+
+Analytics event contract อยู่ใน `src/domain/analytics.ts`
+
+```ts
+type AnalyticsEvent = {
+  name: AnalyticsEventName;
+  timestamp: string;
+  payload: AnalyticsEventPayload;
+};
+```
+
+Event sink ปัจจุบันเป็น dev console only ยังไม่มี provider, SDK, API route, database หรือ `localStorage` event log
+
 ## Current Product Behavior
 
 ระบบปัจจุบันรองรับ:
@@ -116,6 +131,7 @@ type LearnerProfile = {
 - Learner Plan panel สำหรับดูและแก้ preferences
 - Guest learner profile และ session mode display
 - Display name editing ที่บันทึกใน browser เดิม
+- Analytics event abstraction สำหรับ MVP learning loop ผ่าน dev console sink
 - Reset progress
 
 ## Gaps From PRD
@@ -128,7 +144,8 @@ type LearnerProfile = {
 - ยังไม่ได้เลือก auth provider
 - ยังไม่มี scenario mission engine แยกจาก quiz
 - ยังไม่มี profile progress page แยก
-- ยังไม่มี analytics event abstraction
+- ยังไม่มี analytics provider จริง
+- ยังไม่มี analytics event persistence หรือ dashboard
 - ยังไม่มี admin/content manager workflow
 
 ## Domain Logic
@@ -141,9 +158,10 @@ Domain logic ถูกแยกออกจากหน้า UI แล้วบ
 - `src/domain/practice.ts`: normalize saved progress และจัดการ practice notes ราย lesson
 - `src/domain/preferences.ts`: default preferences, preference normalization และ onboarding completion
 - `src/domain/session.ts`: default guest profile, profile normalization และ local profile update
+- `src/domain/analytics.ts`: event contract, event creation และ dev console tracking sink
 - `src/domain/types.ts`: shared types ระหว่าง app และ domain
 
-ขั้นถัดไปคือเลือกว่าจะเพิ่ม auth provider จริง หรือ analytics event abstraction ก่อน โดยยังรักษา migration path จาก guest `localStorage`
+ขั้นถัดไปคือเลือกว่าจะเพิ่ม auth provider จริง backend persistence หรือ analytics sink จริง โดยยังรักษา migration path จาก guest `localStorage`
 
 ## Development Commands
 
