@@ -1,4 +1,5 @@
 import type { SavedState } from "./types";
+import { normalizePreferences } from "./preferences";
 
 type LegacySavedState = Partial<SavedState> & {
   lastPractice?: unknown;
@@ -48,6 +49,11 @@ export function normalizeSavedState(
     xp: typeof saved.xp === "number" ? saved.xp : fallback.xp,
     streak: typeof saved.streak === "number" ? saved.streak : fallback.streak,
     practiceNotes,
+    onboardingCompleted:
+      typeof saved.onboardingCompleted === "boolean"
+        ? saved.onboardingCompleted
+        : fallback.onboardingCompleted,
+    preferences: normalizePreferences(saved.preferences, fallback.preferences),
   };
 }
 

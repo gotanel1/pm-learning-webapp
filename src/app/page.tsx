@@ -11,8 +11,18 @@ import {
   normalizeSavedState,
   savePracticeNote,
 } from "@/domain/practice";
+import {
+  DEFAULT_PREFERENCES,
+  completeOnboarding,
+} from "@/domain/preferences";
 import { completeLesson } from "@/domain/rewards";
-import type { SavedState } from "@/domain/types";
+import type {
+  DailyTarget,
+  ExperienceLevel,
+  LearningGoal,
+  SavedState,
+  UserPreferences,
+} from "@/domain/types";
 import { lessons, type Lesson } from "./lessons";
 
 const STORAGE_KEY = "pm-duolingo-progress-v2";
@@ -23,7 +33,85 @@ const starterState: SavedState = {
   xp: 0,
   streak: 1,
   practiceNotes: {},
+  onboardingCompleted: false,
+  preferences: DEFAULT_PREFERENCES,
 };
+
+const experienceOptions: Array<{
+  value: ExperienceLevel;
+  title: string;
+  description: string;
+}> = [
+  {
+    value: "zero",
+    title: "เริ่มจากศูนย์",
+    description: "ยังไม่รู้ศัพท์ PM และอยากปูพื้นแบบใจเย็น",
+  },
+  {
+    value: "junior",
+    title: "Junior PM",
+    description: "พอรู้ภาพรวม แต่อยากฝึก decision และเอกสารให้คมขึ้น",
+  },
+  {
+    value: "career-switcher",
+    title: "ย้ายสาย",
+    description: "มาจากสายอื่น และอยากเข้าใจงาน PM แบบใช้งานจริง",
+  },
+  {
+    value: "builder",
+    title: "Founder / Developer",
+    description: "อยากคุยกับทีม product/tech ให้เข้าใจกันมากขึ้น",
+  },
+];
+
+const goalOptions: Array<{
+  value: LearningGoal;
+  title: string;
+  description: string;
+}> = [
+  {
+    value: "become-pm",
+    title: "เป็น PM มืออาชีพ",
+    description: "ฝึก mindset, requirement, roadmap และการตัดสินใจ",
+  },
+  {
+    value: "work-with-tech-team",
+    title: "ทำงานกับทีม Tech",
+    description: "เขียน requirement และ handoff ให้ทีม dev เข้าใจง่าย",
+  },
+  {
+    value: "build-own-product",
+    title: "สร้าง product ของตัวเอง",
+    description: "แปลง idea ให้เป็น MVP และ roadmap ที่ทำต่อได้",
+  },
+  {
+    value: "improve-delivery",
+    title: "ส่งมอบงานให้ดีขึ้น",
+    description: "โฟกัส prioritization, risk, QA และ release planning",
+  },
+];
+
+const dailyTargetOptions: Array<{
+  value: DailyTarget;
+  title: string;
+  description: string;
+}> = [
+  {
+    value: 1,
+    title: "1 บท / วัน",
+    description: "เหมาะกับการเริ่มนิสัยเรียนแบบไม่กดดัน",
+  },
+  {
+    value: 2,
+    title: "2 บท / วัน",
+    description: "เดินเร็วขึ้น แต่ยังมีเวลาทำ practice note",
+  },
+  {
+    value: 3,
+    title: "3 บท / วัน",
+    description: "โหมดเร่งพื้นฐานสำหรับคนอยากเห็นภาพรวมไว",
+  },
+];
 
 function loadInitialState(): SavedState {
   if (typeof window === "undefined") return starterState;
@@ -51,6 +139,9 @@ function getInitials(title: string) {
 export default function Home() {
   const [state, setState] = useState<SavedState>(loadInitialState);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [draftPreferences, setDraftPreferences] = useState<UserPreferences>(
+    state.preferences,
+  );
 
   useEffect(() => {
     try {
@@ -105,12 +196,37 @@ export default function Home() {
 
   function resetProgress() {
     setState(starterState);
+    setDraftPreferences(DEFAULT_PREFERENCES);
     setSelectedIndex(null);
-    window.localStorage.removeItem(STORAGE_KEY);
+    try {
+      window.localStorage.removeItem(STORAGE_KEY);
+    } catch (error) {
+      console.warn("Failed to reset saved progress.", error);
+    }
   }
 
   function savePractice(value: string) {
     setState((current) => savePracticeNote(current, activeLesson.id, value));
+  }
+
+  function updatePreference<Key extends keyof UserPreferences>(
+    key: Key,
+    value: UserPreferences[Key],
+  ) {
+    setDraftPreferences((current) => ({
+      ...current,
+      [key]: value,
+    }));
+  }
+
+  function finishOnboarding() {
+    setState((current) => completeOnboarding(current, draftPreferences));
+  }
+
+  function editOnboarding() {
+    setDraftPreferences(state.preferences);
+    setState((current) => ({ ...current, onboardingCompleted: false }));
+    setSelectedIndex(null);
   }
 
   return (
@@ -141,6 +257,13 @@ export default function Home() {
           </div>
         </header>
 
+        {!state.onboardingCompleted ? (
+          <OnboardingPanel
+            preferences={draftPreferences}
+            onChange={updatePreference}
+            onComplete={finishOnboarding}
+          />
+        ) : (
         <div className="relative z-10 mt-5 grid flex-1 gap-5 lg:grid-cols-[360px_1fr]">
           <aside className="rounded-[2rem] border border-white/10 bg-white/[0.07] p-4 backdrop-blur-xl">
             <div className="mb-4 flex items-center justify-between">
@@ -332,6 +455,27 @@ export default function Home() {
               </div>
 
               <div className="rounded-[2rem] border border-white/10 bg-white/[0.08] p-5 backdrop-blur-xl">
+                <p className="text-xs font-black uppercase tracking-[0.25em] text-sky-200">
+                  Learner Plan
+                </p>
+                <h3 className="mt-2 text-xl font-black">
+                  {getLearningGoalTitle(state.preferences.learningGoal)}
+                </h3>
+                <p className="mt-3 text-sm leading-6 text-slate-300">
+                  ระดับ: {getExperienceTitle(state.preferences.experienceLevel)}
+                </p>
+                <p className="mt-1 text-sm leading-6 text-slate-300">
+                  เป้าหมายวันนี้: {state.preferences.dailyTarget} บทเรียน
+                </p>
+                <button
+                  onClick={editOnboarding}
+                  className="mt-4 rounded-full border border-white/10 px-4 py-2 text-sm font-black text-slate-200 transition hover:border-sky-200/60 hover:text-sky-100"
+                >
+                  ปรับแผนเรียน
+                </button>
+              </div>
+
+              <div className="rounded-[2rem] border border-white/10 bg-white/[0.08] p-5 backdrop-blur-xl">
                 <p className="text-xs font-black uppercase tracking-[0.25em] text-lime-200">
                   30-Day Mission
                 </p>
@@ -357,8 +501,134 @@ export default function Home() {
             </aside>
           </section>
         </div>
+        )}
       </section>
     </main>
+  );
+}
+
+function getExperienceTitle(value: ExperienceLevel) {
+  return (
+    experienceOptions.find((option) => option.value === value)?.title ??
+    experienceOptions[0].title
+  );
+}
+
+function getLearningGoalTitle(value: LearningGoal) {
+  return (
+    goalOptions.find((option) => option.value === value)?.title ??
+    goalOptions[0].title
+  );
+}
+
+function OnboardingPanel({
+  preferences,
+  onChange,
+  onComplete,
+}: {
+  preferences: UserPreferences;
+  onChange: <Key extends keyof UserPreferences>(
+    key: Key,
+    value: UserPreferences[Key],
+  ) => void;
+  onComplete: () => void;
+}) {
+  return (
+    <section className="relative z-10 mt-5 grid flex-1 gap-5 lg:grid-cols-[0.88fr_1.12fr]">
+      <div className="flex flex-col justify-between rounded-[2rem] border border-white/10 bg-white/[0.08] p-6 shadow-2xl shadow-black/25 backdrop-blur-xl sm:p-8">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.28em] text-lime-200">
+            Onboarding
+          </p>
+          <h2 className="mt-4 max-w-xl text-4xl font-black tracking-tight sm:text-6xl">
+            ตั้งแผนเรียน PM ที่เข้ากับคุณ
+          </h2>
+          <p className="mt-5 max-w-2xl text-base leading-8 text-slate-200">
+            รอบนี้เราจะใช้ข้อมูลแค่ 3 อย่างเพื่อจัดจังหวะการเรียนในเครื่องนี้:
+            ระดับพื้นฐาน เป้าหมาย และจำนวนบทเรียนต่อวัน
+          </p>
+        </div>
+
+        <div className="mt-8 grid gap-3 sm:grid-cols-3">
+          <Stat label="Path" value="30 วัน" tone="blue" />
+          <Stat label="Daily" value={`${preferences.dailyTarget} บท`} tone="green" />
+          <Stat label="Mode" value="MVP" tone="orange" />
+        </div>
+      </div>
+
+      <div className="rounded-[2rem] border border-white/10 bg-slate-950/45 p-4 backdrop-blur-xl sm:p-6">
+        <PreferenceGroup
+          title="พื้นฐานตอนนี้"
+          options={experienceOptions}
+          selected={preferences.experienceLevel}
+          onSelect={(value) => onChange("experienceLevel", value)}
+        />
+        <PreferenceGroup
+          title="เป้าหมายหลัก"
+          options={goalOptions}
+          selected={preferences.learningGoal}
+          onSelect={(value) => onChange("learningGoal", value)}
+        />
+        <PreferenceGroup
+          title="จังหวะเรียนต่อวัน"
+          options={dailyTargetOptions}
+          selected={preferences.dailyTarget}
+          onSelect={(value) => onChange("dailyTarget", value)}
+        />
+
+        <div className="mt-6 flex flex-col gap-3 border-t border-white/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm leading-6 text-slate-300">
+            เริ่มด้วยบทแรกได้ทันที และปรับแผนนี้ใหม่ภายหลังได้จาก Learner Plan
+          </p>
+          <button
+            onClick={onComplete}
+            className="rounded-full bg-lime-400 px-6 py-3 font-black text-slate-950 shadow-lg shadow-lime-400/20 transition hover:-translate-y-0.5 hover:bg-lime-300"
+          >
+            เริ่มเรียนบทแรก →
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PreferenceGroup<T extends string | number>({
+  title,
+  options,
+  selected,
+  onSelect,
+}: {
+  title: string;
+  options: Array<{ value: T; title: string; description: string }>;
+  selected: T;
+  onSelect: (value: T) => void;
+}) {
+  return (
+    <section className="border-b border-white/10 py-5 first:pt-0 last:border-b-0">
+      <h3 className="text-sm font-black uppercase tracking-[0.22em] text-sky-200">
+        {title}
+      </h3>
+      <div className="mt-3 grid gap-3 md:grid-cols-2">
+        {options.map((option) => (
+          <button
+            key={option.value}
+            onClick={() => onSelect(option.value)}
+            className={`rounded-2xl border p-4 text-left transition ${
+              selected === option.value
+                ? "border-lime-300/70 bg-lime-300/15 shadow-lg shadow-lime-300/10"
+                : "border-white/10 bg-white/[0.04] hover:border-white/25 hover:bg-white/[0.08]"
+            }`}
+          >
+            <span className="block text-base font-black text-white">
+              {option.title}
+            </span>
+            <span className="mt-2 block text-sm leading-6 text-slate-300">
+              {option.description}
+            </span>
+          </button>
+        ))}
+      </div>
+    </section>
   );
 }
 
