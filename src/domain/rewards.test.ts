@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_PREFERENCES } from "./preferences";
 import { completeLesson } from "./rewards";
+import { DEFAULT_PROFILE } from "./session";
 import type { SavedState } from "./types";
 
 const baseState: SavedState = {
@@ -11,6 +12,7 @@ const baseState: SavedState = {
   practiceNotes: {},
   onboardingCompleted: false,
   preferences: DEFAULT_PREFERENCES,
+  profile: DEFAULT_PROFILE,
 };
 
 describe("reward rules", () => {

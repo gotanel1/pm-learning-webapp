@@ -1,5 +1,6 @@
 import type { SavedState } from "./types";
 import { normalizePreferences } from "./preferences";
+import { normalizeLearnerProfile } from "./session";
 
 type LegacySavedState = Partial<SavedState> & {
   lastPractice?: unknown;
@@ -54,6 +55,7 @@ export function normalizeSavedState(
         ? saved.onboardingCompleted
         : fallback.onboardingCompleted,
     preferences: normalizePreferences(saved.preferences, fallback.preferences),
+    profile: normalizeLearnerProfile(saved.profile, fallback.profile),
   };
 }
 
