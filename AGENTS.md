@@ -26,6 +26,7 @@
 ยังไม่มี backend, database, auth จริง, server API หรือ production analytics provider ในรอบนี้
 มี unit tests สำหรับ domain logic ด้วย Vitest
 ยังไม่ได้เลือก auth provider จริง ห้ามเพิ่ม auth vendor/dependency โดยไม่มี explicit decision
+Analytics events ใช้ dev console sink เท่านั้นจนกว่าจะมี explicit provider/backend decision
 
 ## Next.js 16 Rule
 
@@ -149,6 +150,7 @@ Expected result: `200`
 - Preserve current working behavior unless intentionally changing it.
 - Avoid adding paid services or external vendors without an explicit decision.
 - Do not add auth providers, analytics vendors, SDKs, backend services, or new paid dependencies without an explicit product/tech decision.
+- Do not replace the dev console analytics sink with a vendor, SDK, API route, database, or persistent event log without an explicit decision.
 - Wrap every API call in `try/catch` or an equivalent typed error-handling path.
 - Use `try/catch` around functions that can reasonably fail, such as JSON parsing, storage access, network calls, file IO, auth/session work, database operations, and third-party SDK calls.
 - Never swallow errors silently. Return a safe fallback, surface a user-friendly message when relevant, and keep enough detail for debugging.
@@ -189,7 +191,7 @@ When adding features, protect these core product expectations:
 
 - `src/app/page.tsx`: current one-page learning app with guest profile and onboarding
 - `src/app/lessons.ts`: 30-day lesson seed content and quiz choices
-- `src/domain/`: testable domain rules for lessons, progress, rewards, practice notes, preferences, and session profile
+- `src/domain/`: testable domain rules for lessons, progress, rewards, practice notes, preferences, session profile, and analytics events
 - `src/app/layout.tsx`: metadata and root layout
 - `src/app/globals.css`: Tailwind import and global tokens
 - `docs/prd-pm-duolingo-webapp.md`: product requirements

@@ -15,6 +15,7 @@
 - First-run onboarding สำหรับระดับพื้นฐาน เป้าหมาย และเป้าต่อวัน
 - Learner Plan panel สำหรับทบทวนและปรับ preferences
 - Guest profile พร้อม display name และ session mode ใน browser เครื่องนี้
+- Analytics event abstraction สำหรับ learning loop โดยส่งเข้า dev console เท่านั้น
 - Practice textarea แยกตามบทเรียนและบันทึกใน browser `localStorage`
 - 30-day mission checklist
 - Reset progress
@@ -94,4 +95,4 @@ npm run start
 - เลือกและเพิ่ม auth provider จริงตาม PRD
 - เพิ่ม seed content สำหรับ 3 beginner modules ใน format ที่ backend ใช้ต่อได้
 - เพิ่ม dashboard/profile API เมื่อเริ่ม backend foundation
-- เพิ่ม analytics event abstraction ก่อนเชื่อม provider จริง
+- เลือก analytics provider/backend sink จริงก่อนเปลี่ยนจาก dev console

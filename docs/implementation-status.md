@@ -2,8 +2,8 @@
 
 ## Current Branch
 
-- Branch: `codex/session-foundation`
-- Phase: Auth/session foundation without provider
+- Branch: `codex/analytics-event-abstraction`
+- Phase: Analytics event abstraction without vendor
 - GitHub repo: `gotanel1/pm-learning-webapp`
 
 ## Completed
@@ -19,6 +19,8 @@
 - User preferences are normalized through domain logic and stored with progress in the existing `localStorage` state.
 - Guest learner profile is stored with progress and includes display name plus session mode.
 - Session domain helpers normalize saved profile data and update local display names without changing learning progress.
+- Analytics event contract now covers the core MVP learning loop.
+- Analytics events currently use a dev console sink only; no provider, backend, API route, database, dependency, or event log has been added.
 
 ## Current App Capabilities
 
@@ -31,11 +33,12 @@
 - Learner Plan panel for reviewing and editing preferences
 - Guest mode profile display in the header
 - Local display name editing for the current browser profile
+- Dev console analytics events for onboarding, lesson selection, quiz answers, lesson completion, next lesson, practice note updates, profile updates, and reset
 
 ## Next Phase
 
 Choose the next implementation slice after this branch is merged:
 
 - Add real auth provider and backend persistence.
-- Add analytics event abstraction before sending product events to a vendor.
+- Replace the dev console analytics sink with a real provider/backend after an explicit vendor decision.
 - Keep the `localStorage` migration stable until auth/persistence is implemented.

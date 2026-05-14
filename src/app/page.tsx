@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { trackEvent } from "@/domain/analytics";
 import {
   canMoveNext,
   getProgressPercent,
@@ -22,6 +23,7 @@ import {
   updateLearnerProfile,
 } from "@/domain/session";
 import type {
+  AnswerLabel,
   DailyTarget,
   ExperienceLevel,
   LearningGoal,
@@ -31,6 +33,7 @@ import type {
 import { lessons, type Lesson } from "./lessons";
 
 const STORAGE_KEY = "pm-duolingo-progress-v2";
+const ANSWER_LABELS = ["A", "B", "C", "D"] as const satisfies readonly AnswerLabel[];
 
 const starterState: SavedState = {
   activeLessonId: lessons[0].id,
@@ -142,6 +145,10 @@ function getInitials(title: string) {
     .toUpperCase();
 }
 
+function getAnswerLabel(index: number): AnswerLabel {
+  return ANSWER_LABELS[index] ?? "A";
+}
+
 export default function Home() {
   const [state, setState] = useState<SavedState>(loadInitialState);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -188,22 +195,69 @@ export default function Home() {
     if (!isUnlocked) return;
     setState((current) => ({ ...current, activeLessonId: lesson.id }));
     setSelectedIndex(null);
+    trackEvent("lesson_selected", {
+      userId: state.profile.userId,
+      sessionMode: state.profile.sessionMode,
+      lessonId: lesson.id,
+      lessonIndex,
+      completedCount,
+      xp: state.xp,
+    });
   }
 
   function answer(index: number) {
     setSelectedIndex(index);
     const choice = activeLesson.choices[index];
-    if (!choice.correct || completedSet.has(activeLesson.id)) return;
-    setState((current) => completeLesson(current, activeLesson));
+    const answerCorrect = choice.correct;
+    const wasCompleted = completedSet.has(activeLesson.id);
+
+    trackEvent("quiz_answered", {
+      userId: state.profile.userId,
+      sessionMode: state.profile.sessionMode,
+      lessonId: activeLesson.id,
+      lessonIndex: activeIndex,
+      completedCount,
+      xp: state.xp,
+      answerCorrect,
+      answerLabel: getAnswerLabel(index),
+    });
+
+    if (!answerCorrect || wasCompleted) return;
+
+    const nextState = completeLesson(state, activeLesson);
+    setState(nextState);
+    trackEvent("lesson_completed", {
+      userId: nextState.profile.userId,
+      sessionMode: nextState.profile.sessionMode,
+      lessonId: activeLesson.id,
+      lessonIndex: activeIndex,
+      completedCount: nextState.completedIds.length,
+      xp: nextState.xp,
+    });
   }
 
   function goNext() {
     const nextLesson = lessons[Math.min(activeIndex + 1, lessons.length - 1)];
     setState((current) => ({ ...current, activeLessonId: nextLesson.id }));
     setSelectedIndex(null);
+    trackEvent("next_lesson_clicked", {
+      userId: state.profile.userId,
+      sessionMode: state.profile.sessionMode,
+      lessonId: activeLesson.id,
+      targetLessonId: nextLesson.id,
+      lessonIndex: activeIndex,
+      completedCount,
+      xp: state.xp,
+    });
   }
 
   function resetProgress() {
+    trackEvent("progress_reset", {
+      userId: state.profile.userId,
+      sessionMode: state.profile.sessionMode,
+      completedCount,
+      xp: state.xp,
+    });
     setState(starterState);
     setDraftPreferences(DEFAULT_PREFERENCES);
     setDraftDisplayName(DEFAULT_PROFILE.displayName);
@@ -217,6 +271,15 @@ export default function Home() {
 
   function savePractice(value: string) {
     setState((current) => savePracticeNote(current, activeLesson.id, value));
+    trackEvent("practice_note_updated", {
+      userId: state.profile.userId,
+      sessionMode: state.profile.sessionMode,
+      lessonId: activeLesson.id,
+      lessonIndex: activeIndex,
+      completedCount,
+      xp: state.xp,
+      practiceNoteLength: value.length,
+    });
   }
 
   function updatePreference<Key extends keyof UserPreferences>(
@@ -230,7 +293,14 @@ export default function Home() {
   }
 
   function finishOnboarding() {
-    setState((current) => completeOnboarding(current, draftPreferences));
+    const nextState = completeOnboarding(state, draftPreferences);
+    setState(nextState);
+    trackEvent("onboarding_completed", {
+      userId: nextState.profile.userId,
+      sessionMode: nextState.profile.sessionMode,
+      completedCount: nextState.completedIds.length,
+      xp: nextState.xp,
+    });
   }
 
   function editOnboarding() {
@@ -244,10 +314,18 @@ export default function Home() {
       { ...state.profile, displayName: draftDisplayName },
       state.profile,
     );
+    const nextState = updateLearnerProfile(state, {
+      displayName: nextProfile.displayName,
+    });
     setDraftDisplayName(nextProfile.displayName);
-    setState((current) =>
-      updateLearnerProfile(current, { displayName: nextProfile.displayName }),
-    );
+    setState(nextState);
+    trackEvent("profile_updated", {
+      userId: nextState.profile.userId,
+      sessionMode: nextState.profile.sessionMode,
+      completedCount: nextState.completedIds.length,
+      xp: nextState.xp,
+      displayName: nextState.profile.displayName,
+    });
   }
 
   return (
