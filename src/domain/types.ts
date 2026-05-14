@@ -38,6 +38,7 @@ export type SavedState = {
   practiceNotes: Record<string, string>;
   onboardingCompleted: boolean;
   preferences: UserPreferences;
+  profile: LearnerProfile;
 };
 
 export type AnswerLabel = "A" | "B" | "C" | "D";
@@ -58,4 +59,12 @@ export type UserPreferences = {
   experienceLevel: ExperienceLevel;
   learningGoal: LearningGoal;
   dailyTarget: DailyTarget;
+};
+
+export type SessionMode = "guest" | "authenticated";
+
+export type LearnerProfile = {
+  userId: string;
+  displayName: string;
+  sessionMode: SessionMode;
 };

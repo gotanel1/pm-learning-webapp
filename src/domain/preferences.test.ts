@@ -4,6 +4,7 @@ import {
   completeOnboarding,
   normalizePreferences,
 } from "./preferences";
+import { DEFAULT_PROFILE } from "./session";
 import type { SavedState } from "./types";
 
 const baseState: SavedState = {
@@ -14,6 +15,7 @@ const baseState: SavedState = {
   practiceNotes: {},
   onboardingCompleted: false,
   preferences: DEFAULT_PREFERENCES,
+  profile: DEFAULT_PROFILE,
 };
 
 describe("user preferences", () => {

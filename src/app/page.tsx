@@ -16,6 +16,11 @@ import {
   completeOnboarding,
 } from "@/domain/preferences";
 import { completeLesson } from "@/domain/rewards";
+import {
+  DEFAULT_PROFILE,
+  normalizeLearnerProfile,
+  updateLearnerProfile,
+} from "@/domain/session";
 import type {
   DailyTarget,
   ExperienceLevel,
@@ -35,6 +40,7 @@ const starterState: SavedState = {
   practiceNotes: {},
   onboardingCompleted: false,
   preferences: DEFAULT_PREFERENCES,
+  profile: DEFAULT_PROFILE,
 };
 
 const experienceOptions: Array<{
@@ -142,6 +148,9 @@ export default function Home() {
   const [draftPreferences, setDraftPreferences] = useState<UserPreferences>(
     state.preferences,
   );
+  const [draftDisplayName, setDraftDisplayName] = useState(
+    state.profile.displayName,
+  );
 
   useEffect(() => {
     try {
@@ -197,6 +206,7 @@ export default function Home() {
   function resetProgress() {
     setState(starterState);
     setDraftPreferences(DEFAULT_PREFERENCES);
+    setDraftDisplayName(DEFAULT_PROFILE.displayName);
     setSelectedIndex(null);
     try {
       window.localStorage.removeItem(STORAGE_KEY);
@@ -229,6 +239,17 @@ export default function Home() {
     setSelectedIndex(null);
   }
 
+  function saveDisplayName() {
+    const nextProfile = normalizeLearnerProfile(
+      { ...state.profile, displayName: draftDisplayName },
+      state.profile,
+    );
+    setDraftDisplayName(nextProfile.displayName);
+    setState((current) =>
+      updateLearnerProfile(current, { displayName: nextProfile.displayName }),
+    );
+  }
+
   return (
     <main className="min-h-screen overflow-hidden bg-[#07111f] text-white">
       <section className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-5 sm:px-6 lg:px-8">
@@ -251,6 +272,16 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-3 gap-2 text-center sm:flex sm:items-center">
+            <div className="col-span-3 rounded-2xl border border-white/10 bg-slate-950/35 px-4 py-2 text-left sm:col-span-1">
+              <p className="max-w-40 truncate text-sm font-black leading-none">
+                {state.profile.displayName}
+              </p>
+              <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-sky-100/70">
+                {state.profile.sessionMode === "guest"
+                  ? "Guest mode"
+                  : "Authenticated"}
+              </p>
+            </div>
             <Stat label="XP" value={state.xp.toString()} tone="green" />
             <Stat label="Streak" value={`${state.streak} วัน`} tone="orange" />
             <Stat label="Progress" value={`${completedCount}/${totalLessons}`} tone="blue" />
@@ -452,6 +483,34 @@ export default function Home() {
                   placeholder="พิมพ์คำตอบ/โน้ตของคุณตรงนี้ ระบบจะจำไว้ในเครื่องนี้"
                   className="mt-4 min-h-36 w-full resize-none rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm leading-6 text-white outline-none ring-lime-300/30 placeholder:text-slate-500 focus:border-lime-300/60 focus:ring-4"
                 />
+              </div>
+
+              <div className="rounded-[2rem] border border-white/10 bg-white/[0.08] p-5 backdrop-blur-xl">
+                <p className="text-xs font-black uppercase tracking-[0.25em] text-cyan-200">
+                  Guest Profile
+                </p>
+                <h3 className="mt-2 text-xl font-black">โปรไฟล์ในเครื่องนี้</h3>
+                <p className="mt-3 text-sm leading-6 text-slate-300">
+                  Progress ของ guest จะถูกเก็บไว้ใน browser เครื่องนี้จนกว่าจะมีระบบ login จริง
+                </p>
+                <label className="mt-4 block text-xs font-black uppercase tracking-[0.2em] text-slate-400">
+                  Display name
+                </label>
+                <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                  <input
+                    value={draftDisplayName}
+                    onChange={(event) => setDraftDisplayName(event.target.value)}
+                    onBlur={saveDisplayName}
+                    className="min-w-0 flex-1 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm font-bold text-white outline-none ring-cyan-300/30 placeholder:text-slate-500 focus:border-cyan-300/60 focus:ring-4"
+                    placeholder="PM Learner"
+                  />
+                  <button
+                    onClick={saveDisplayName}
+                    className="rounded-full bg-cyan-300 px-4 py-3 text-sm font-black text-slate-950 transition hover:-translate-y-0.5 hover:bg-cyan-200"
+                  >
+                    Save
+                  </button>
+                </div>
               </div>
 
               <div className="rounded-[2rem] border border-white/10 bg-white/[0.08] p-5 backdrop-blur-xl">

@@ -2,8 +2,8 @@
 
 ## Current Branch
 
-- Branch: `codex/onboarding-user-preferences`
-- Phase: Onboarding and user preferences
+- Branch: `codex/session-foundation`
+- Phase: Auth/session foundation without provider
 - GitHub repo: `gotanel1/pm-learning-webapp`
 
 ## Completed
@@ -17,6 +17,8 @@
 - Practice notes are saved per lesson and legacy `lastPractice` data migrates into the active lesson note.
 - Onboarding captures learner experience level, primary learning goal, and daily lesson target.
 - User preferences are normalized through domain logic and stored with progress in the existing `localStorage` state.
+- Guest learner profile is stored with progress and includes display name plus session mode.
+- Session domain helpers normalize saved profile data and update local display names without changing learning progress.
 
 ## Current App Capabilities
 
@@ -27,11 +29,13 @@
 - Practice notes saved per lesson in browser `localStorage`
 - First-run onboarding for learner preferences
 - Learner Plan panel for reviewing and editing preferences
+- Guest mode profile display in the header
+- Local display name editing for the current browser profile
 
 ## Next Phase
 
-Start `auth/session` after this branch is merged:
+Choose the next implementation slice after this branch is merged:
 
-- Keep the `localStorage` migration stable until auth/persistence is designed.
-- Preserve the tested domain rules when introducing backend persistence.
+- Add real auth provider and backend persistence.
 - Add analytics event abstraction before sending product events to a vendor.
+- Keep the `localStorage` migration stable until auth/persistence is implemented.

@@ -5,6 +5,7 @@ import {
   savePracticeNote,
 } from "./practice";
 import { DEFAULT_PREFERENCES } from "./preferences";
+import { DEFAULT_PROFILE } from "./session";
 import type { SavedState } from "./types";
 
 const fallback: SavedState = {
@@ -15,6 +16,7 @@ const fallback: SavedState = {
   practiceNotes: {},
   onboardingCompleted: false,
   preferences: DEFAULT_PREFERENCES,
+  profile: DEFAULT_PROFILE,
 };
 
 describe("practice notes", () => {
@@ -71,6 +73,41 @@ describe("practice notes", () => {
       experienceLevel: "builder",
       learningGoal: "build-own-product",
       dailyTarget: 3,
+    });
+  });
+
+  it("migrates old saved state without a profile to the default guest profile", () => {
+    const migrated = normalizeSavedState(
+      {
+        activeLessonId: "lesson-1",
+        completedIds: ["lesson-1"],
+        xp: 20,
+      },
+      fallback,
+    );
+
+    expect(migrated.profile).toEqual(DEFAULT_PROFILE);
+    expect(migrated.completedIds).toEqual(["lesson-1"]);
+    expect(migrated.xp).toBe(20);
+  });
+
+  it("migrates a valid saved learner profile", () => {
+    const migrated = normalizeSavedState(
+      {
+        activeLessonId: "lesson-1",
+        profile: {
+          userId: "user-123",
+          displayName: "Tana",
+          sessionMode: "authenticated",
+        },
+      },
+      fallback,
+    );
+
+    expect(migrated.profile).toEqual({
+      userId: "user-123",
+      displayName: "Tana",
+      sessionMode: "authenticated",
     });
   });
 });

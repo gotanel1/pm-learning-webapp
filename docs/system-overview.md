@@ -9,9 +9,9 @@
 ระบบปัจจุบันเป็น Next.js App Router prototype ที่ทำงานในหน้าเดียว
 
 - `src/app/layout.tsx`: root layout, metadata, font setup
-- `src/app/page.tsx`: client-side app สำหรับ onboarding, learning path, quiz, feedback, XP/streak, progress และ practice note
+- `src/app/page.tsx`: client-side app สำหรับ guest profile, onboarding, learning path, quiz, feedback, XP/streak, progress และ practice note
 - `src/app/lessons.ts`: seed content ของบทเรียน 30 วัน พร้อมคำถาม ตัวเลือก feedback และ practice prompt
-- `src/domain/`: domain logic สำหรับ lesson choices, progress, rewards, practice notes, user preferences และ shared types
+- `src/domain/`: domain logic สำหรับ lesson choices, progress, rewards, practice notes, user preferences, learner session และ shared types
 - `src/app/globals.css`: global styles, Tailwind CSS import, focus/selection styles
 - `public/`: static assets จาก Next scaffold
 
@@ -24,12 +24,13 @@
 1. `src/app/page.tsx` โหลด lesson seed จาก `src/app/lessons.ts`
 2. component อ่าน progress เดิมจาก `localStorage` key `pm-duolingo-progress-v2`
 3. ถ้าไม่มีข้อมูลเดิม ระบบใช้ `starterState`
-4. ถ้า onboarding ยังไม่ complete ผู้ใช้ตั้งระดับพื้นฐาน เป้าหมาย และจำนวนบทต่อวัน
-5. ผู้ใช้เลือกบทเรียนที่ unlock แล้วได้จาก Learning Path
-6. ผู้ใช้ตอบ quiz
-7. ถ้าตอบถูก ระบบเพิ่ม lesson id เข้า `completedIds`, เพิ่ม XP และปรับ streak
-8. state ถูกเขียนกลับเข้า `localStorage`
-9. ผู้ใช้สามารถไปบทถัดไป เขียน practice note หรือปรับ Learner Plan ได้
+4. ระบบ migrate หรือสร้าง `LearnerProfile` default สำหรับ guest session
+5. ถ้า onboarding ยังไม่ complete ผู้ใช้ตั้งระดับพื้นฐาน เป้าหมาย และจำนวนบทต่อวัน
+6. ผู้ใช้เลือกบทเรียนที่ unlock แล้วได้จาก Learning Path
+7. ผู้ใช้ตอบ quiz
+8. ถ้าตอบถูก ระบบเพิ่ม lesson id เข้า `completedIds`, เพิ่ม XP และปรับ streak
+9. state ถูกเขียนกลับเข้า `localStorage`
+10. ผู้ใช้สามารถไปบทถัดไป เขียน practice note ปรับ Learner Plan หรือแก้ display name ได้
 
 ## Current Data Shape
 
@@ -67,6 +68,7 @@ type SavedState = {
   practiceNotes: Record<string, string>;
   onboardingCompleted: boolean;
   preferences: UserPreferences;
+  profile: LearnerProfile;
 };
 ```
 
@@ -86,6 +88,18 @@ type UserPreferences = {
 };
 ```
 
+### `LearnerProfile`
+
+`LearnerProfile` อยู่ใน `src/domain/types.ts`
+
+```ts
+type LearnerProfile = {
+  userId: string;
+  displayName: string;
+  sessionMode: "guest" | "authenticated";
+};
+```
+
 ## Current Product Behavior
 
 ระบบปัจจุบันรองรับ:
@@ -100,6 +114,8 @@ type UserPreferences = {
 - Practice notes แยกตาม lesson และเก็บใน `localStorage`
 - First-run onboarding สำหรับ learner preferences
 - Learner Plan panel สำหรับดูและแก้ preferences
+- Guest learner profile และ session mode display
+- Display name editing ที่บันทึกใน browser เดิม
 - Reset progress
 
 ## Gaps From PRD
@@ -109,6 +125,7 @@ type UserPreferences = {
 - ยังไม่มี signup/login จริง
 - ยังไม่มี backend API
 - ยังไม่มี database หรือ cross-device sync
+- ยังไม่ได้เลือก auth provider
 - ยังไม่มี scenario mission engine แยกจาก quiz
 - ยังไม่มี profile progress page แยก
 - ยังไม่มี analytics event abstraction
@@ -123,9 +140,10 @@ Domain logic ถูกแยกออกจากหน้า UI แล้วบ
 - `src/domain/rewards.ts`: complete lesson, XP และ streak rules
 - `src/domain/practice.ts`: normalize saved progress และจัดการ practice notes ราย lesson
 - `src/domain/preferences.ts`: default preferences, preference normalization และ onboarding completion
+- `src/domain/session.ts`: default guest profile, profile normalization และ local profile update
 - `src/domain/types.ts`: shared types ระหว่าง app และ domain
 
-ขั้นถัดไปคือเพิ่ม auth/session โดยอิง domain rules ที่ test แล้ว ไม่ย้าย logic กลับเข้า UI
+ขั้นถัดไปคือเลือกว่าจะเพิ่ม auth provider จริง หรือ analytics event abstraction ก่อน โดยยังรักษา migration path จาก guest `localStorage`
 
 ## Development Commands
 
