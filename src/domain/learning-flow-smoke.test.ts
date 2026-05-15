@@ -29,11 +29,16 @@ describe("first-run learning flow smoke", () => {
     const firstLesson = lessons[0];
     const secondLesson = lessons[1];
     const correctChoice = firstLesson.choices.find((choice) => choice.correct);
+    const correctMissionChoice = firstLesson.mission.choices.find(
+      (choice) => choice.correct,
+    );
 
     expect(onboarded.onboardingCompleted).toBe(true);
     expect(isLessonUnlocked(0, onboarded.completedIds, lessons)).toBe(true);
     expect(isLessonUnlocked(1, onboarded.completedIds, lessons)).toBe(false);
     expect(correctChoice).toBeDefined();
+    expect(correctMissionChoice).toBeDefined();
+    expect(firstLesson.mission.scenario).toBe(firstLesson.practice);
     expect(canMoveNext(correctChoice ?? null, false)).toBe(true);
 
     const completed = completeLesson(onboarded, firstLesson);

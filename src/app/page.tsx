@@ -153,6 +153,9 @@ export default function Home() {
   const [state, setState] = useState<SavedState>(starterState);
   const [hasLoadedSavedState, setHasLoadedSavedState] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [selectedMissionIndex, setSelectedMissionIndex] = useState<number | null>(
+    null,
+  );
   const [draftPreferences, setDraftPreferences] = useState<UserPreferences>(
     starterState.preferences,
   );
@@ -199,6 +202,10 @@ export default function Home() {
   const completedCount = state.completedIds.length;
   const selectedChoice =
     selectedIndex === null ? null : activeLesson.choices[selectedIndex];
+  const selectedMissionChoice =
+    selectedMissionIndex === null
+      ? null
+      : activeLesson.mission.choices[selectedMissionIndex];
   const progressPercent = getProgressPercent(completedCount, totalLessons);
   const canGoNext = canMoveNext(
     selectedChoice,
@@ -216,6 +223,7 @@ export default function Home() {
     if (!isUnlocked) return;
     setState((current) => ({ ...current, activeLessonId: lesson.id }));
     setSelectedIndex(null);
+    setSelectedMissionIndex(null);
     trackEvent("lesson_selected", {
       userId: state.profile.userId,
       sessionMode: state.profile.sessionMode,
@@ -261,6 +269,7 @@ export default function Home() {
     const nextLesson = lessons[Math.min(activeIndex + 1, lessons.length - 1)];
     setState((current) => ({ ...current, activeLessonId: nextLesson.id }));
     setSelectedIndex(null);
+    setSelectedMissionIndex(null);
     trackEvent("next_lesson_clicked", {
       userId: state.profile.userId,
       sessionMode: state.profile.sessionMode,
@@ -283,6 +292,7 @@ export default function Home() {
     setDraftPreferences(DEFAULT_PREFERENCES);
     setDraftDisplayName(DEFAULT_PROFILE.displayName);
     setSelectedIndex(null);
+    setSelectedMissionIndex(null);
     try {
       window.localStorage.removeItem(STORAGE_KEY);
     } catch (error) {
@@ -328,6 +338,7 @@ export default function Home() {
     setDraftPreferences(state.preferences);
     setState((current) => ({ ...current, onboardingCompleted: false }));
     setSelectedIndex(null);
+    setSelectedMissionIndex(null);
   }
 
   function saveDisplayName() {
@@ -347,6 +358,10 @@ export default function Home() {
       xp: nextState.xp,
       displayName: nextState.profile.displayName,
     });
+  }
+
+  function answerMission(index: number) {
+    setSelectedMissionIndex(index);
   }
 
   return (
@@ -580,10 +595,76 @@ export default function Home() {
             <aside className="space-y-5">
               <div className="rounded-[2rem] border border-white/10 bg-white/[0.08] p-5 backdrop-blur-xl">
                 <p className="text-xs font-black uppercase tracking-[0.25em] text-purple-200">
-                  Practice
+                  Scenario Mission
                 </p>
-                <h3 className="mt-2 text-xl font-black">โจทย์ลงมือทำ</h3>
-                <p className="mt-3 leading-7 text-slate-200">{activeLesson.practice}</p>
+                <h3 className="mt-2 text-xl font-black">
+                  {activeLesson.mission.title}
+                </h3>
+                <p className="mt-3 rounded-2xl border border-white/10 bg-slate-950/45 p-4 text-sm leading-6 text-slate-200">
+                  {activeLesson.mission.scenario}
+                </p>
+                <p className="mt-4 text-sm font-bold leading-6 text-white">
+                  {activeLesson.mission.prompt}
+                </p>
+                <div className="mt-3 grid gap-2">
+                  {activeLesson.mission.choices.map((choice, index) => {
+                    const isSelected = selectedMissionIndex === index;
+                    const showCorrect =
+                      selectedMissionIndex !== null && choice.correct;
+                    const showWrong = isSelected && !choice.correct;
+                    return (
+                      <button
+                        type="button"
+                        key={choice.text}
+                        onClick={() => answerMission(index)}
+                        data-testid={`mission-choice-${String.fromCharCode(65 + index)}`}
+                        className={`rounded-2xl border p-3 text-left text-sm font-bold leading-6 transition ${
+                          showCorrect
+                            ? "border-lime-300 bg-lime-300/20 text-lime-50"
+                            : showWrong
+                              ? "border-rose-300 bg-rose-400/20 text-rose-50"
+                              : isSelected
+                                ? "border-purple-300 bg-purple-400/15"
+                                : "border-white/10 bg-slate-950/35 hover:border-white/25 hover:bg-white/[0.08]"
+                        }`}
+                      >
+                        <span className="mr-2 inline-grid h-6 w-6 place-items-center rounded-full bg-white/10 text-xs">
+                          {String.fromCharCode(65 + index)}
+                        </span>
+                        {choice.text}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {selectedMissionChoice ? (
+                  <div
+                    className={`mt-3 rounded-2xl border p-4 ${
+                      selectedMissionChoice.correct
+                        ? "border-lime-300/40 bg-lime-300/15"
+                        : "border-rose-300/40 bg-rose-300/15"
+                    }`}
+                  >
+                    <p className="font-black">
+                      {selectedMissionChoice.correct
+                        ? "แนวทางนี้เหมาะ ✅"
+                        : "ยังไม่ใช่ทางที่ดีที่สุด ❌"}
+                    </p>
+                    <p className="mt-1 text-sm leading-6 text-slate-100">
+                      {selectedMissionChoice.feedback}
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="rounded-[2rem] border border-white/10 bg-white/[0.08] p-5 backdrop-blur-xl">
+                <p className="text-xs font-black uppercase tracking-[0.25em] text-purple-200">
+                  Practice Note
+                </p>
+                <h3 className="mt-2 text-xl font-black">เขียนคำตอบจริง</h3>
+                <p className="mt-3 leading-7 text-slate-200">
+                  หลังเลือกแนวทาง mission แล้ว ลองเขียนคำตอบของคุณให้เป็นภาษาที่ส่งต่อทีมได้
+                </p>
                 <textarea
                   value={activePracticeNote}
                   onChange={(event) => savePractice(event.target.value)}
@@ -653,6 +734,7 @@ export default function Home() {
                 <h3 className="mt-2 text-xl font-black">ภารกิจวันนี้</h3>
                 <ul className="mt-4 space-y-3 text-sm text-slate-200">
                   <MissionItem done={state.completedIds.length >= 1} text="จบบทเรียนอย่างน้อย 1 บท" />
+                  <MissionItem done={selectedMissionChoice?.correct ?? false} text="เลือกแนวทาง scenario mission ที่เหมาะสม" />
                   <MissionItem done={activePracticeNote.length >= 80} text="เขียน practice note อย่างน้อย 80 ตัวอักษร" />
                   <MissionItem done={progressPercent >= 30} text="ทำ path ให้ครบ 30% (9 บทแรก)" />
                 </ul>

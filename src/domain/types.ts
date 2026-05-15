@@ -17,6 +17,21 @@ export type Lesson = {
   prompt: string;
   choices: Choice[];
   practice: string;
+  mission: ScenarioMission;
+};
+
+export type MissionChoice = {
+  text: string;
+  correct: boolean;
+  feedback: string;
+};
+
+export type ScenarioMission = {
+  id: string;
+  title: string;
+  scenario: string;
+  prompt: string;
+  choices: [MissionChoice, MissionChoice, MissionChoice, MissionChoice];
 };
 
 export type Distractor = {
@@ -24,7 +39,7 @@ export type Distractor = {
   feedback: string;
 };
 
-export type LessonSeed = Omit<Lesson, "choices"> & {
+export type LessonSeed = Omit<Lesson, "choices" | "mission"> & {
   answer: string;
   answerFeedback: string;
   distractors: [Distractor, Distractor, Distractor];

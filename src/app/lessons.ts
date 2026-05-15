@@ -1,4 +1,5 @@
 import { buildChoices } from "@/domain/lessons";
+import { buildScenarioMission } from "@/domain/missions";
 import type { Lesson, LessonSeed } from "@/domain/types";
 
 export type { Choice, Lesson } from "@/domain/types";
@@ -954,5 +955,6 @@ export const lessons: Lesson[] = lessonSeeds.map((lesson, lessonIndex) => {
     prompt: lesson.prompt,
     practice: lesson.practice,
     choices: buildChoices(lesson, lessonIndex),
+    mission: buildScenarioMission(lesson, lessonIndex),
   };
 });
