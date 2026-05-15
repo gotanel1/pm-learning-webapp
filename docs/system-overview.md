@@ -11,7 +11,7 @@
 - `src/app/layout.tsx`: root layout, metadata, font setup
 - `src/app/page.tsx`: client-side app สำหรับ guest profile, onboarding, learning path, quiz, feedback, XP/streak, progress และ practice note
 - `src/app/lessons.ts`: seed content ของบทเรียน 30 วัน พร้อมคำถาม ตัวเลือก feedback และ practice prompt
-- `src/domain/`: domain logic สำหรับ lesson choices, progress, rewards, practice notes, user preferences, learner session, analytics events และ shared types
+- `src/domain/`: domain logic สำหรับ lesson choices, scenario missions, progress, rewards, practice notes, user preferences, learner session, analytics events และ shared types
 - `src/app/globals.css`: global styles, Tailwind CSS import, focus/selection styles
 - `public/`: static assets จาก Next scaffold
 
@@ -54,6 +54,21 @@ export type Lesson = {
   prompt: string;
   choices: Choice[];
   practice: string;
+  mission: ScenarioMission;
+};
+```
+
+### `ScenarioMission`
+
+`ScenarioMission` อยู่ใน `src/domain/types.ts` และถูกสร้างจาก lesson seed ผ่าน `src/domain/missions.ts`
+
+```ts
+type ScenarioMission = {
+  id: string;
+  title: string;
+  scenario: string;
+  prompt: string;
+  choices: [MissionChoice, MissionChoice, MissionChoice, MissionChoice];
 };
 ```
 
@@ -133,6 +148,8 @@ Event sink ปัจจุบันเป็น dev console only ยังไม
 - Guest learner profile และ session mode display
 - Display name editing ที่บันทึกใน browser เดิม
 - Analytics event abstraction สำหรับ MVP learning loop ผ่าน dev console sink
+- Scenario Mission แบบ structured choice พร้อม feedback ทันที
+- Practice Note แยกจาก mission decision เพื่อให้ผู้เรียนลงมือเขียนคำตอบจริง
 - Reset progress
 
 ## Gaps From PRD
@@ -147,6 +164,7 @@ Event sink ปัจจุบันเป็น dev console only ยังไม
 - ยังไม่มี profile progress page แยก
 - ยังไม่มี analytics provider จริง
 - ยังไม่มี analytics event persistence หรือ dashboard
+- ยังไม่มี mission completion persistence/reward ledger แยกจาก lesson completion
 - ยังไม่มี admin/content manager workflow
 
 ## Domain Logic
@@ -154,6 +172,7 @@ Event sink ปัจจุบันเป็น dev console only ยังไม
 Domain logic ถูกแยกออกจากหน้า UI แล้วบางส่วน:
 
 - `src/domain/lessons.ts`: สร้าง choices และกระจายตำแหน่งคำตอบถูก
+- `src/domain/missions.ts`: สร้าง scenario mission แบบ deterministic จาก lesson seed
 - `src/domain/progress.ts`: lesson unlock, progress percent และ next-step gating
 - `src/domain/rewards.ts`: complete lesson, XP และ streak rules
 - `src/domain/practice.ts`: normalize saved progress และจัดการ practice notes ราย lesson

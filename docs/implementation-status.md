@@ -2,8 +2,8 @@
 
 ## Current Branch
 
-- Branch: `codex/learning-flow-stabilization`
-- Phase: Learning flow stabilization and smoke coverage
+- Branch: `codex/content-mission-structure`
+- Phase: Content and structured mission foundation
 - GitHub repo: `gotanel1/pm-learning-webapp`
 
 ## Completed
@@ -24,6 +24,9 @@
 - First-run hydration now starts from the same server/client state and loads browser progress after mount to avoid mismatch.
 - Primary interactive controls now expose stable `data-testid` attributes for smoke automation.
 - Unit smoke coverage now verifies onboarding, first lesson completion, next lesson unlock, practice note persistence, and profile update together.
+- Each lesson now includes a structured `ScenarioMission` generated from lesson seed content.
+- Scenario missions show selectable choices and immediate feedback before the learner writes a practice note.
+- Mission domain tests verify stable mission IDs, exactly one correct choice, and deterministic choice order.
 
 ## Current App Capabilities
 
@@ -39,11 +42,14 @@
 - Dev console analytics events for onboarding, lesson selection, quiz answers, lesson completion, next lesson, practice note updates, profile updates, and reset
 - Hydration-safe first-run loading from browser `localStorage`
 - Stable smoke-test selectors for key learning-flow actions
+- Structured scenario mission card for every lesson
+- Practice note area separated from mission decision feedback
 
 ## Next Phase
 
 Choose the next implementation slice after this branch is merged:
 
+- Add mission completion persistence and rewards if missions should gate progress.
 - Add real auth provider and backend persistence.
 - Replace the dev console analytics sink with a real provider/backend after an explicit vendor decision.
 - Keep the `localStorage` migration stable until auth/persistence is implemented.

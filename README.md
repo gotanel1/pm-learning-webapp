@@ -16,6 +16,7 @@
 - Learner Plan panel สำหรับทบทวนและปรับ preferences
 - Guest profile พร้อม display name และ session mode ใน browser เครื่องนี้
 - Analytics event abstraction สำหรับ learning loop โดยส่งเข้า dev console เท่านั้น
+- Scenario Mission แบบ structured choice พร้อม feedback ก่อนเขียน practice note
 - Practice textarea แยกตามบทเรียนและบันทึกใน browser `localStorage`
 - 30-day mission checklist
 - Reset progress
@@ -92,7 +93,8 @@ npm run start
 
 ## Next Implementation Steps
 
+- เพิ่ม mission completion persistence/reward หากต้องการให้ mission เป็น gate หลักของ progress
 - เลือกและเพิ่ม auth provider จริงตาม PRD
-- เพิ่ม seed content สำหรับ 3 beginner modules ใน format ที่ backend ใช้ต่อได้
+- เพิ่ม seed content format สำหรับ backend หรือ content manager ในอนาคต
 - เพิ่ม dashboard/profile API เมื่อเริ่ม backend foundation
 - เลือก analytics provider/backend sink จริงก่อนเปลี่ยนจาก dev console
