@@ -2,8 +2,8 @@
 
 ## Current Branch
 
-- Branch: `codex/analytics-event-abstraction`
-- Phase: Analytics event abstraction without vendor
+- Branch: `codex/learning-flow-stabilization`
+- Phase: Learning flow stabilization and smoke coverage
 - GitHub repo: `gotanel1/pm-learning-webapp`
 
 ## Completed
@@ -21,6 +21,9 @@
 - Session domain helpers normalize saved profile data and update local display names without changing learning progress.
 - Analytics event contract now covers the core MVP learning loop.
 - Analytics events currently use a dev console sink only; no provider, backend, API route, database, dependency, or event log has been added.
+- First-run hydration now starts from the same server/client state and loads browser progress after mount to avoid mismatch.
+- Primary interactive controls now expose stable `data-testid` attributes for smoke automation.
+- Unit smoke coverage now verifies onboarding, first lesson completion, next lesson unlock, practice note persistence, and profile update together.
 
 ## Current App Capabilities
 
@@ -34,6 +37,8 @@
 - Guest mode profile display in the header
 - Local display name editing for the current browser profile
 - Dev console analytics events for onboarding, lesson selection, quiz answers, lesson completion, next lesson, practice note updates, profile updates, and reset
+- Hydration-safe first-run loading from browser `localStorage`
+- Stable smoke-test selectors for key learning-flow actions
 
 ## Next Phase
 
@@ -42,3 +47,4 @@ Choose the next implementation slice after this branch is merged:
 - Add real auth provider and backend persistence.
 - Replace the dev console analytics sink with a real provider/backend after an explicit vendor decision.
 - Keep the `localStorage` migration stable until auth/persistence is implemented.
+- Add a full browser E2E runner when the app grows beyond the current single-page MVP.

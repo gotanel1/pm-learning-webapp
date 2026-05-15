@@ -22,16 +22,17 @@
 เมื่อผู้ใช้เปิดหน้าแรก:
 
 1. `src/app/page.tsx` โหลด lesson seed จาก `src/app/lessons.ts`
-2. component อ่าน progress เดิมจาก `localStorage` key `pm-duolingo-progress-v2`
-3. ถ้าไม่มีข้อมูลเดิม ระบบใช้ `starterState`
-4. ระบบ migrate หรือสร้าง `LearnerProfile` default สำหรับ guest session
-5. ถ้า onboarding ยังไม่ complete ผู้ใช้ตั้งระดับพื้นฐาน เป้าหมาย และจำนวนบทต่อวัน
-6. ผู้ใช้เลือกบทเรียนที่ unlock แล้วได้จาก Learning Path
-7. ผู้ใช้ตอบ quiz
-8. ถ้าตอบถูก ระบบเพิ่ม lesson id เข้า `completedIds`, เพิ่ม XP และปรับ streak
-9. state ถูกเขียนกลับเข้า `localStorage`
-10. ผู้ใช้สามารถไปบทถัดไป เขียน practice note ปรับ Learner Plan หรือแก้ display name ได้
-11. action สำคัญของ learning loop จะเรียก analytics abstraction และส่ง event เข้า dev console
+2. initial render ใช้ `starterState` เพื่อให้ server/client hydration ตรงกัน
+3. หลัง mount แล้ว component อ่าน progress เดิมจาก `localStorage` key `pm-duolingo-progress-v2`
+4. ถ้าไม่มีข้อมูลเดิม ระบบใช้ `starterState`
+5. ระบบ migrate หรือสร้าง `LearnerProfile` default สำหรับ guest session
+6. ถ้า onboarding ยังไม่ complete ผู้ใช้ตั้งระดับพื้นฐาน เป้าหมาย และจำนวนบทต่อวัน
+7. ผู้ใช้เลือกบทเรียนที่ unlock แล้วได้จาก Learning Path
+8. ผู้ใช้ตอบ quiz
+9. ถ้าตอบถูก ระบบเพิ่ม lesson id เข้า `completedIds`, เพิ่ม XP และปรับ streak
+10. state ถูกเขียนกลับเข้า `localStorage`
+11. ผู้ใช้สามารถไปบทถัดไป เขียน practice note ปรับ Learner Plan หรือแก้ display name ได้
+12. action สำคัญของ learning loop จะเรียก analytics abstraction และส่ง event เข้า dev console
 
 ## Current Data Shape
 
