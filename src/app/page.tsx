@@ -150,22 +150,43 @@ function getAnswerLabel(index: number): AnswerLabel {
 }
 
 export default function Home() {
-  const [state, setState] = useState<SavedState>(loadInitialState);
+  const [state, setState] = useState<SavedState>(starterState);
+  const [hasLoadedSavedState, setHasLoadedSavedState] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [draftPreferences, setDraftPreferences] = useState<UserPreferences>(
-    state.preferences,
+    starterState.preferences,
   );
   const [draftDisplayName, setDraftDisplayName] = useState(
-    state.profile.displayName,
+    starterState.profile.displayName,
   );
 
   useEffect(() => {
+    let isActive = true;
+
+    queueMicrotask(() => {
+      if (!isActive) return;
+
+      const savedState = loadInitialState();
+      setState(savedState);
+      setDraftPreferences(savedState.preferences);
+      setDraftDisplayName(savedState.profile.displayName);
+      setHasLoadedSavedState(true);
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoadedSavedState) return;
+
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch (error) {
       console.warn("Failed to save progress.", error);
     }
-  }, [state]);
+  }, [hasLoadedSavedState, state]);
 
   const completedSet = useMemo(
     () => new Set(state.completedIds),
@@ -381,7 +402,9 @@ export default function Home() {
                 <p className="text-sm text-slate-300">30 บท · ปูพื้น PM → UX → Tech Bridge</p>
               </div>
               <button
+                type="button"
                 onClick={resetProgress}
+                data-testid="reset-progress-button"
                 className="rounded-full border border-white/10 px-3 py-1 text-xs font-bold text-slate-300 transition hover:border-rose-300/60 hover:text-rose-200"
               >
                 Reset
@@ -399,9 +422,11 @@ export default function Home() {
                 const isActive = lesson.id === activeLesson.id;
                 return (
                   <button
+                    type="button"
                     key={lesson.id}
                     onClick={() => selectLesson(lesson)}
                     disabled={!isUnlocked}
+                    data-testid={`lesson-button-${lesson.id}`}
                     className={`group flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition ${
                       isActive
                         ? "border-lime-300/70 bg-lime-300/15 shadow-lg shadow-lime-300/10"
@@ -495,8 +520,10 @@ export default function Home() {
                     const showWrong = isSelected && !choice.correct;
                     return (
                       <button
+                        type="button"
                         key={choice.text}
                         onClick={() => answer(index)}
+                        data-testid={`quiz-choice-${String.fromCharCode(65 + index)}`}
                         className={`rounded-2xl border p-4 text-left font-bold transition ${
                           showCorrect
                             ? "border-lime-300 bg-lime-300/20 text-lime-50"
@@ -538,8 +565,10 @@ export default function Home() {
                     ตอบถูกเพื่อเก็บ XP และปลดล็อกบทถัดไป
                   </p>
                   <button
+                    type="button"
                     onClick={goNext}
                     disabled={!canGoNext || activeIndex === lessons.length - 1}
+                    data-testid="next-lesson-button"
                     className="rounded-full bg-lime-400 px-6 py-3 font-black text-slate-950 shadow-lg shadow-lime-400/20 transition hover:-translate-y-0.5 hover:bg-lime-300 disabled:cursor-not-allowed disabled:bg-slate-600 disabled:text-slate-300 disabled:shadow-none"
                   >
                     ไปบทถัดไป →
@@ -579,11 +608,14 @@ export default function Home() {
                     value={draftDisplayName}
                     onChange={(event) => setDraftDisplayName(event.target.value)}
                     onBlur={saveDisplayName}
+                    data-testid="display-name-input"
                     className="min-w-0 flex-1 rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm font-bold text-white outline-none ring-cyan-300/30 placeholder:text-slate-500 focus:border-cyan-300/60 focus:ring-4"
                     placeholder="PM Learner"
                   />
                   <button
+                    type="button"
                     onClick={saveDisplayName}
+                    data-testid="save-display-name-button"
                     className="rounded-full bg-cyan-300 px-4 py-3 text-sm font-black text-slate-950 transition hover:-translate-y-0.5 hover:bg-cyan-200"
                   >
                     Save
@@ -605,7 +637,9 @@ export default function Home() {
                   เป้าหมายวันนี้: {state.preferences.dailyTarget} บทเรียน
                 </p>
                 <button
+                  type="button"
                   onClick={editOnboarding}
+                  data-testid="edit-onboarding-button"
                   className="mt-4 rounded-full border border-white/10 px-4 py-2 text-sm font-black text-slate-200 transition hover:border-sky-200/60 hover:text-sky-100"
                 >
                   ปรับแผนเรียน
@@ -718,7 +752,9 @@ function OnboardingPanel({
             เริ่มด้วยบทแรกได้ทันที และปรับแผนนี้ใหม่ภายหลังได้จาก Learner Plan
           </p>
           <button
+            type="button"
             onClick={onComplete}
+            data-testid="start-learning-button"
             className="rounded-full bg-lime-400 px-6 py-3 font-black text-slate-950 shadow-lg shadow-lime-400/20 transition hover:-translate-y-0.5 hover:bg-lime-300"
           >
             เริ่มเรียนบทแรก →
@@ -748,8 +784,10 @@ function PreferenceGroup<T extends string | number>({
       <div className="mt-3 grid gap-3 md:grid-cols-2">
         {options.map((option) => (
           <button
+            type="button"
             key={option.value}
             onClick={() => onSelect(option.value)}
+            data-testid={`preference-option-${option.value}`}
             className={`rounded-2xl border p-4 text-left transition ${
               selected === option.value
                 ? "border-lime-300/70 bg-lime-300/15 shadow-lg shadow-lime-300/10"
