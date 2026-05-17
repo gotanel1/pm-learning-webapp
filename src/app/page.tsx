@@ -16,7 +16,11 @@ import {
   DEFAULT_PREFERENCES,
   completeOnboarding,
 } from "@/domain/preferences";
-import { completeLesson } from "@/domain/rewards";
+import {
+  MISSION_COMPLETION_XP,
+  completeLesson,
+  completeMission,
+} from "@/domain/rewards";
 import {
   DEFAULT_PROFILE,
   normalizeLearnerProfile,
@@ -38,6 +42,7 @@ const ANSWER_LABELS = ["A", "B", "C", "D"] as const satisfies readonly AnswerLab
 const starterState: SavedState = {
   activeLessonId: lessons[0].id,
   completedIds: [],
+  completedMissionIds: [],
   xp: 0,
   streak: 1,
   practiceNotes: {},
@@ -195,6 +200,10 @@ export default function Home() {
     () => new Set(state.completedIds),
     [state.completedIds],
   );
+  const completedMissionSet = useMemo(
+    () => new Set(state.completedMissionIds),
+    [state.completedMissionIds],
+  );
   const activeLesson =
     lessons.find((lesson) => lesson.id === state.activeLessonId) ?? lessons[0];
   const activeIndex = lessons.findIndex((lesson) => lesson.id === activeLesson.id);
@@ -206,6 +215,7 @@ export default function Home() {
     selectedMissionIndex === null
       ? null
       : activeLesson.mission.choices[selectedMissionIndex];
+  const isMissionCompleted = completedMissionSet.has(activeLesson.mission.id);
   const progressPercent = getProgressPercent(completedCount, totalLessons);
   const canGoNext = canMoveNext(
     selectedChoice,
@@ -362,6 +372,34 @@ export default function Home() {
 
   function answerMission(index: number) {
     setSelectedMissionIndex(index);
+    const missionChoice = activeLesson.mission.choices[index];
+    const wasMissionCompleted = completedMissionSet.has(activeLesson.mission.id);
+
+    trackEvent("mission_answered", {
+      userId: state.profile.userId,
+      sessionMode: state.profile.sessionMode,
+      lessonId: activeLesson.id,
+      missionId: activeLesson.mission.id,
+      lessonIndex: activeIndex,
+      completedCount,
+      xp: state.xp,
+      answerCorrect: missionChoice.correct,
+      answerLabel: getAnswerLabel(index),
+    });
+
+    if (!missionChoice.correct || wasMissionCompleted) return;
+
+    const nextState = completeMission(state, activeLesson.mission);
+    setState(nextState);
+    trackEvent("mission_completed", {
+      userId: nextState.profile.userId,
+      sessionMode: nextState.profile.sessionMode,
+      lessonId: activeLesson.id,
+      missionId: activeLesson.mission.id,
+      lessonIndex: activeIndex,
+      completedCount: nextState.completedIds.length,
+      xp: nextState.xp,
+    });
   }
 
   return (
@@ -597,9 +635,22 @@ export default function Home() {
                 <p className="text-xs font-black uppercase tracking-[0.25em] text-purple-200">
                   Scenario Mission
                 </p>
-                <h3 className="mt-2 text-xl font-black">
-                  {activeLesson.mission.title}
-                </h3>
+                <div className="mt-2 flex items-start justify-between gap-3">
+                  <h3 className="text-xl font-black">
+                    {activeLesson.mission.title}
+                  </h3>
+                  <span
+                    className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-wider ${
+                      isMissionCompleted
+                        ? "bg-lime-300 text-slate-950"
+                        : "bg-purple-300/15 text-purple-100"
+                    }`}
+                  >
+                    {isMissionCompleted
+                      ? "Mission done"
+                      : `+${MISSION_COMPLETION_XP} XP`}
+                  </span>
+                </div>
                 <p className="mt-3 rounded-2xl border border-white/10 bg-slate-950/45 p-4 text-sm leading-6 text-slate-200">
                   {activeLesson.mission.scenario}
                 </p>
@@ -610,7 +661,8 @@ export default function Home() {
                   {activeLesson.mission.choices.map((choice, index) => {
                     const isSelected = selectedMissionIndex === index;
                     const showCorrect =
-                      selectedMissionIndex !== null && choice.correct;
+                      (selectedMissionIndex !== null || isMissionCompleted) &&
+                      choice.correct;
                     const showWrong = isSelected && !choice.correct;
                     return (
                       <button
@@ -652,6 +704,13 @@ export default function Home() {
                     </p>
                     <p className="mt-1 text-sm leading-6 text-slate-100">
                       {selectedMissionChoice.feedback}
+                    </p>
+                  </div>
+                ) : isMissionCompleted ? (
+                  <div className="mt-3 rounded-2xl border border-lime-300/40 bg-lime-300/15 p-4">
+                    <p className="font-black">Mission completed ✅</p>
+                    <p className="mt-1 text-sm leading-6 text-slate-100">
+                      ระบบจำ mission นี้ไว้แล้ว และจะไม่ให้ XP ซ้ำเมื่อกลับมาตอบใหม่
                     </p>
                   </div>
                 ) : null}
@@ -734,7 +793,7 @@ export default function Home() {
                 <h3 className="mt-2 text-xl font-black">ภารกิจวันนี้</h3>
                 <ul className="mt-4 space-y-3 text-sm text-slate-200">
                   <MissionItem done={state.completedIds.length >= 1} text="จบบทเรียนอย่างน้อย 1 บท" />
-                  <MissionItem done={selectedMissionChoice?.correct ?? false} text="เลือกแนวทาง scenario mission ที่เหมาะสม" />
+                  <MissionItem done={isMissionCompleted} text="เลือกแนวทาง scenario mission ที่เหมาะสม" />
                   <MissionItem done={activePracticeNote.length >= 80} text="เขียน practice note อย่างน้อย 80 ตัวอักษร" />
                   <MissionItem done={progressPercent >= 30} text="ทำ path ให้ครบ 30% (9 บทแรก)" />
                 </ul>

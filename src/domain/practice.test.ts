@@ -11,6 +11,7 @@ import type { SavedState } from "./types";
 const fallback: SavedState = {
   activeLessonId: "lesson-1",
   completedIds: [],
+  completedMissionIds: [],
   xp: 0,
   streak: 1,
   practiceNotes: {},
@@ -50,6 +51,7 @@ describe("practice notes", () => {
 
     expect(migrated.practiceNotes).toEqual({ "lesson-2": "legacy note" });
     expect(migrated.completedIds).toEqual(["lesson-1"]);
+    expect(migrated.completedMissionIds).toEqual([]);
     expect(migrated.xp).toBe(20);
     expect(migrated.streak).toBe(2);
   });
@@ -89,6 +91,18 @@ describe("practice notes", () => {
     expect(migrated.profile).toEqual(DEFAULT_PROFILE);
     expect(migrated.completedIds).toEqual(["lesson-1"]);
     expect(migrated.xp).toBe(20);
+  });
+
+  it("migrates saved mission completion ids and filters invalid values", () => {
+    const migrated = normalizeSavedState(
+      {
+        activeLessonId: "lesson-1",
+        completedMissionIds: ["lesson-1-mission", 42, null],
+      },
+      fallback,
+    );
+
+    expect(migrated.completedMissionIds).toEqual(["lesson-1-mission"]);
   });
 
   it("migrates a valid saved learner profile", () => {

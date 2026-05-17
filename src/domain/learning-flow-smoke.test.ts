@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { lessons } from "@/app/lessons";
 import { completeOnboarding } from "./preferences";
 import { isLessonUnlocked, canMoveNext } from "./progress";
-import { completeLesson } from "./rewards";
+import { MISSION_COMPLETION_XP, completeLesson, completeMission } from "./rewards";
 import { DEFAULT_PROFILE, updateLearnerProfile } from "./session";
 import { DEFAULT_PREFERENCES } from "./preferences";
 import { getPracticeNote, savePracticeNote } from "./practice";
@@ -11,6 +11,7 @@ import type { SavedState } from "./types";
 const starterState: SavedState = {
   activeLessonId: lessons[0].id,
   completedIds: [],
+  completedMissionIds: [],
   xp: 0,
   streak: 1,
   practiceNotes: {},
@@ -42,8 +43,9 @@ describe("first-run learning flow smoke", () => {
     expect(canMoveNext(correctChoice ?? null, false)).toBe(true);
 
     const completed = completeLesson(onboarded, firstLesson);
+    const missionCompleted = completeMission(completed, firstLesson.mission);
     const withPractice = savePracticeNote(
-      completed,
+      missionCompleted,
       firstLesson.id,
       "Practice answer for a first-time learner.",
     );
@@ -52,7 +54,8 @@ describe("first-run learning flow smoke", () => {
     });
 
     expect(renamed.completedIds).toEqual([firstLesson.id]);
-    expect(renamed.xp).toBe(firstLesson.xp);
+    expect(renamed.completedMissionIds).toEqual([firstLesson.mission.id]);
+    expect(renamed.xp).toBe(firstLesson.xp + MISSION_COMPLETION_XP);
     expect(isLessonUnlocked(1, renamed.completedIds, lessons)).toBe(true);
     expect(renamed.activeLessonId).toBe(firstLesson.id);
     expect(secondLesson.id).not.toBe(firstLesson.id);

@@ -23,10 +23,10 @@ MVP ต้องพิสูจน์ว่า user สามารถ:
 
 ## Current Progress
 
-สถานะล่าสุดหลัง milestone `Content + Mission Structure`:
+สถานะล่าสุดหลัง milestone `Mission Completion + Reward Rules`:
 
-- Overall MVP ตาม PRD: ประมาณ `45%`
-- Local prototype ที่ยังไม่รวม auth/backend จริง: ประมาณ `80%`
+- Overall MVP ตาม PRD: ประมาณ `50%`
+- Local prototype ที่ยังไม่รวม auth/backend จริง: ประมาณ `84%`
 
 ## Completed So Far
 
@@ -44,12 +44,15 @@ MVP ต้องพิสูจน์ว่า user สามารถ:
 - แก้ hydration mismatch จากการอ่าน `localStorage`
 - เพิ่ม stable `data-testid` selectors สำหรับ smoke automation
 - เพิ่ม Scenario Mission แบบ structured choice พร้อม feedback ให้ทุก lesson
+- บันทึก mission completion แยกจาก lesson completion
+- ให้ mission XP แบบ one-time และกัน XP ซ้ำเมื่อกลับมาตอบใหม่
+- เพิ่ม analytics events สำหรับ `mission_answered` และ `mission_completed`
 
 ## Remaining Major Work
 
 - Real auth/signup/login
 - Backend/database persistence
-- Mission completion persistence/reward แยกจาก lesson completion
+- ตัดสินใจว่า mission completion จะ gate การปลดล็อกบทถัดไปหรือเป็น bonus reward
 - Dashboard/profile progress แบบเต็ม
 - Real analytics provider หรือ backend event sink
 - Production CI/deploy pipeline และ smoke checklist
@@ -57,18 +60,18 @@ MVP ต้องพิสูจน์ว่า user สามารถ:
 
 ## Recommended Next Milestone
 
-ทำ `Mission Completion + Reward Rules` ต่อจาก structured mission ก่อน real auth/backend
+ทำ `Auth + Backend Persistence Decision` หรือ `Mission Gate Decision` ต่อจาก mission reward rules
 
 เหตุผล:
 
-- Learning loop หลักมีแล้ว และ `scenario mission` เริ่มมี structure แล้ว
-- ขั้นถัดไปควรทำให้ mission completion มี state/reward ชัด เพื่อให้เข้าใกล้ loop ตาม PRD มากขึ้น
-- Auth/backend ควรเข้าหลังจากเรารู้แน่แล้วว่า content, quiz, mission และ progress shape ต้องเก็บอะไรบ้าง
+- Learning loop local มี lesson, quiz, structured mission, practice note, XP และ saved state แล้ว
+- ตอนนี้เริ่มเห็น data shape ที่ backend ต้องเก็บ: lesson completion, mission completion, notes, profile และ preferences
+- ก่อนเพิ่ม backend ควรตัดสินใจว่า mission เป็น gate หลักของ progress หรือเป็น bonus reward เพื่อไม่ต้อง migrate behavior ซ้ำ
 
 Next milestone target:
 
 ```text
-lesson -> quiz -> structured mission -> feedback -> XP/progress
+guest local progress -> auth/backend-ready progress model -> cross-device persistence
 ```
 
 โดยยังใช้ local/static data ก่อน และยังไม่เพิ่ม vendor หรือ backend จนกว่าจะตัดสินใจชัดเจน

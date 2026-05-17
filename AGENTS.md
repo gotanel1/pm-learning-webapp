@@ -21,7 +21,7 @@
 - Content seed: `src/app/lessons.ts`
 - Styling: Tailwind CSS v4 ผ่าน `src/app/globals.css`
 - Current storage: browser `localStorage`
-- Current app state: prototype ที่ทำ guest profile, onboarding, learner preferences และ learning loop ได้ในหน้าเดียว
+- Current app state: prototype ที่ทำ guest profile, onboarding, learner preferences, quiz completion, mission completion และ learning loop ได้ในหน้าเดียว
 
 ยังไม่มี backend, database, auth จริง, server API หรือ production analytics provider ในรอบนี้
 มี unit tests สำหรับ domain logic ด้วย Vitest
@@ -135,9 +135,10 @@ Expected result: `200`
 3. Add tests for domain behavior
 4. Add onboarding and user preferences
 5. Add auth/session layer
-6. Add backend or persistence layer
-7. Add analytics event abstraction
-8. Prepare deployment and smoke tests
+6. Add analytics event abstraction
+7. Add mission completion persistence and reward rules
+8. Add backend or persistence layer
+9. Prepare deployment and smoke tests
 
 ## Coding Guidelines
 
@@ -176,7 +177,7 @@ lesson -> quiz -> scenario mission -> feedback -> XP/streak -> unlock next step
 Current prototype approximates this as:
 
 ```text
-lesson -> quiz choice -> feedback -> XP/streak -> unlock next lesson -> practice note
+lesson -> quiz choice -> feedback -> quiz XP/unlock -> structured mission -> mission XP -> practice note
 ```
 
 When adding features, protect these core product expectations:
@@ -191,7 +192,7 @@ When adding features, protect these core product expectations:
 
 - `src/app/page.tsx`: current one-page learning app with guest profile and onboarding
 - `src/app/lessons.ts`: 30-day lesson seed content and quiz choices
-- `src/domain/`: testable domain rules for lessons, progress, rewards, practice notes, preferences, session profile, and analytics events
+- `src/domain/`: testable domain rules for lessons, missions, progress, rewards, practice notes, preferences, session profile, and analytics events
 - `src/app/layout.tsx`: metadata and root layout
 - `src/app/globals.css`: Tailwind import and global tokens
 - `docs/prd-pm-duolingo-webapp.md`: product requirements
