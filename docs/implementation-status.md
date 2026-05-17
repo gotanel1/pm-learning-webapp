@@ -28,7 +28,7 @@
 - Scenario missions show selectable choices and immediate feedback before the learner writes a practice note.
 - Mission domain tests verify stable mission IDs, exactly one correct choice, and deterministic choice order.
 - Mission completion is now stored separately from lesson completion through `completedMissionIds`.
-- Correct mission answers award one-time mission XP and do not duplicate rewards after reload or repeat attempts.
+- Correct mission answers award one-time mission XP after lesson completion and do not duplicate rewards after reload or repeat attempts.
 - Analytics events now include `mission_answered` and `mission_completed` through the existing dev console sink.
 
 ## Current App Capabilities
@@ -48,7 +48,7 @@
 - Structured scenario mission card for every lesson
 - Practice note area separated from mission decision feedback
 - Mission completion state saved in browser `localStorage`
-- One-time mission XP reward with duplicate reward protection
+- One-time mission XP reward after quiz completion with duplicate reward protection
 
 ## Next Phase
 

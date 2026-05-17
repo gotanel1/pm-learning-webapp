@@ -45,7 +45,7 @@ MVP ต้องพิสูจน์ว่า user สามารถ:
 - เพิ่ม stable `data-testid` selectors สำหรับ smoke automation
 - เพิ่ม Scenario Mission แบบ structured choice พร้อม feedback ให้ทุก lesson
 - บันทึก mission completion แยกจาก lesson completion
-- ให้ mission XP แบบ one-time และกัน XP ซ้ำเมื่อกลับมาตอบใหม่
+- ให้ mission XP แบบ one-time หลัง quiz ผ่าน และกัน XP ซ้ำเมื่อกลับมาตอบใหม่
 - เพิ่ม analytics events สำหรับ `mission_answered` และ `mission_completed`
 
 ## Remaining Major Work

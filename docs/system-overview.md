@@ -30,7 +30,7 @@
 7. ผู้ใช้เลือกบทเรียนที่ unlock แล้วได้จาก Learning Path
 8. ผู้ใช้ตอบ quiz
 9. ถ้าตอบถูก ระบบเพิ่ม lesson id เข้า `completedIds`, เพิ่ม XP และปรับ streak
-10. ถ้าตอบ scenario mission ถูก ระบบเพิ่ม mission id เข้า `completedMissionIds` และเพิ่ม one-time mission XP
+10. หลัง lesson completed แล้ว ถ้าตอบ scenario mission ถูก ระบบเพิ่ม mission id เข้า `completedMissionIds` และเพิ่ม one-time mission XP
 11. state ถูกเขียนกลับเข้า `localStorage`
 12. ผู้ใช้สามารถไปบทถัดไป เขียน practice note ปรับ Learner Plan หรือแก้ display name ได้
 13. action สำคัญของ learning loop จะเรียก analytics abstraction และส่ง event เข้า dev console
@@ -151,7 +151,7 @@ Event sink ปัจจุบันเป็น dev console only ยังไม
 - Display name editing ที่บันทึกใน browser เดิม
 - Analytics event abstraction สำหรับ MVP learning loop ผ่าน dev console sink
 - Scenario Mission แบบ structured choice พร้อม feedback ทันที
-- Mission completion persistence พร้อม one-time mission XP และ duplicate reward protection
+- Mission completion persistence พร้อม one-time mission XP หลัง quiz ผ่าน และ duplicate reward protection
 - Practice Note แยกจาก mission decision เพื่อให้ผู้เรียนลงมือเขียนคำตอบจริง
 - Reset progress
 

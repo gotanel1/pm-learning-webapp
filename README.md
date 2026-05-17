@@ -17,7 +17,7 @@
 - Guest profile พร้อม display name และ session mode ใน browser เครื่องนี้
 - Analytics event abstraction สำหรับ learning loop โดยส่งเข้า dev console เท่านั้น
 - Scenario Mission แบบ structured choice พร้อม feedback ก่อนเขียน practice note
-- Mission completion persistence พร้อม one-time mission XP
+- Mission completion persistence พร้อม one-time mission XP หลัง quiz ผ่าน
 - Practice textarea แยกตามบทเรียนและบันทึกใน browser `localStorage`
 - 30-day mission checklist
 - Reset progress

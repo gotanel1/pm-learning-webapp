@@ -30,3 +30,10 @@ export function canMoveNext(
 ): boolean {
   return Boolean(selectedChoice?.correct || isCompleted);
 }
+
+export function canAnswerMission(
+  isLessonCompleted: boolean,
+  isMissionCompleted: boolean,
+): boolean {
+  return isLessonCompleted && !isMissionCompleted;
+}

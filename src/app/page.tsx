@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { trackEvent } from "@/domain/analytics";
 import {
+  canAnswerMission,
   canMoveNext,
   getProgressPercent,
   isLessonUnlocked,
@@ -215,12 +216,14 @@ export default function Home() {
     selectedMissionIndex === null
       ? null
       : activeLesson.mission.choices[selectedMissionIndex];
+  const isLessonCompleted = completedSet.has(activeLesson.id);
   const isMissionCompleted = completedMissionSet.has(activeLesson.mission.id);
-  const progressPercent = getProgressPercent(completedCount, totalLessons);
-  const canGoNext = canMoveNext(
-    selectedChoice,
-    completedSet.has(activeLesson.id),
+  const canAttemptMission = canAnswerMission(
+    isLessonCompleted,
+    isMissionCompleted,
   );
+  const progressPercent = getProgressPercent(completedCount, totalLessons);
+  const canGoNext = canMoveNext(selectedChoice, isLessonCompleted);
   const activePracticeNote = getPracticeNote(state, activeLesson.id);
 
   function selectLesson(lesson: Lesson) {
@@ -371,9 +374,10 @@ export default function Home() {
   }
 
   function answerMission(index: number) {
+    if (!canAttemptMission) return;
+
     setSelectedMissionIndex(index);
     const missionChoice = activeLesson.mission.choices[index];
-    const wasMissionCompleted = completedMissionSet.has(activeLesson.mission.id);
 
     trackEvent("mission_answered", {
       userId: state.profile.userId,
@@ -387,7 +391,7 @@ export default function Home() {
       answerLabel: getAnswerLabel(index),
     });
 
-    if (!missionChoice.correct || wasMissionCompleted) return;
+    if (!missionChoice.correct) return;
 
     const nextState = completeMission(state, activeLesson.mission);
     setState(nextState);
@@ -648,7 +652,9 @@ export default function Home() {
                   >
                     {isMissionCompleted
                       ? "Mission done"
-                      : `+${MISSION_COMPLETION_XP} XP`}
+                      : isLessonCompleted
+                        ? `+${MISSION_COMPLETION_XP} XP`
+                        : "ผ่าน quiz ก่อน"}
                   </span>
                 </div>
                 <p className="mt-3 rounded-2xl border border-white/10 bg-slate-950/45 p-4 text-sm leading-6 text-slate-200">
@@ -669,6 +675,7 @@ export default function Home() {
                         type="button"
                         key={choice.text}
                         onClick={() => answerMission(index)}
+                        disabled={!canAttemptMission}
                         data-testid={`mission-choice-${String.fromCharCode(65 + index)}`}
                         className={`rounded-2xl border p-3 text-left text-sm font-bold leading-6 transition ${
                           showCorrect
@@ -676,9 +683,9 @@ export default function Home() {
                             : showWrong
                               ? "border-rose-300 bg-rose-400/20 text-rose-50"
                               : isSelected
-                                ? "border-purple-300 bg-purple-400/15"
-                                : "border-white/10 bg-slate-950/35 hover:border-white/25 hover:bg-white/[0.08]"
-                        }`}
+                              ? "border-purple-300 bg-purple-400/15"
+                              : "border-white/10 bg-slate-950/35 hover:border-white/25 hover:bg-white/[0.08]"
+                        } disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-white/10 disabled:hover:bg-slate-950/35`}
                       >
                         <span className="mr-2 inline-grid h-6 w-6 place-items-center rounded-full bg-white/10 text-xs">
                           {String.fromCharCode(65 + index)}
@@ -688,6 +695,12 @@ export default function Home() {
                     );
                   })}
                 </div>
+
+                {!isLessonCompleted ? (
+                  <p className="mt-3 rounded-2xl border border-sky-300/25 bg-sky-300/10 p-3 text-sm leading-6 text-sky-50">
+                    ตอบ quiz ให้ถูกก่อน แล้ว mission จะเปิดให้เก็บ XP เพิ่ม
+                  </p>
+                ) : null}
 
                 {selectedMissionChoice ? (
                   <div

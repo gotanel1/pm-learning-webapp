@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { canMoveNext, getProgressPercent, isLessonUnlocked } from "./progress";
+import {
+  canAnswerMission,
+  canMoveNext,
+  getProgressPercent,
+  isLessonUnlocked,
+} from "./progress";
 import type { Choice, Lesson } from "./types";
 
 const lessons = [
@@ -44,5 +49,11 @@ describe("progress rules", () => {
     expect(canMoveNext(wrongChoice, true)).toBe(true);
     expect(canMoveNext(wrongChoice, false)).toBe(false);
     expect(canMoveNext(null, false)).toBe(false);
+  });
+
+  it("allows mission answers only after lesson completion and before mission completion", () => {
+    expect(canAnswerMission(true, false)).toBe(true);
+    expect(canAnswerMission(false, false)).toBe(false);
+    expect(canAnswerMission(true, true)).toBe(false);
   });
 });

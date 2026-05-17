@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { lessons } from "@/app/lessons";
 import { completeOnboarding } from "./preferences";
-import { isLessonUnlocked, canMoveNext } from "./progress";
+import { isLessonUnlocked, canAnswerMission, canMoveNext } from "./progress";
 import { MISSION_COMPLETION_XP, completeLesson, completeMission } from "./rewards";
 import { DEFAULT_PROFILE, updateLearnerProfile } from "./session";
 import { DEFAULT_PREFERENCES } from "./preferences";
@@ -41,8 +41,10 @@ describe("first-run learning flow smoke", () => {
     expect(correctMissionChoice).toBeDefined();
     expect(firstLesson.mission.scenario).toBe(firstLesson.practice);
     expect(canMoveNext(correctChoice ?? null, false)).toBe(true);
+    expect(canAnswerMission(false, false)).toBe(false);
 
     const completed = completeLesson(onboarded, firstLesson);
+    expect(canAnswerMission(true, false)).toBe(true);
     const missionCompleted = completeMission(completed, firstLesson.mission);
     const withPractice = savePracticeNote(
       missionCompleted,
