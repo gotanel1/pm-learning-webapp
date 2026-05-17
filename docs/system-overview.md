@@ -182,7 +182,8 @@ Domain logic ถูกแยกออกจากหน้า UI แล้วบ
 - `src/domain/preferences.ts`: default preferences, preference normalization และ onboarding completion
 - `src/domain/session.ts`: default guest profile, profile normalization และ local profile update
 - `src/domain/analytics.ts`: event contract, event creation และ dev console tracking sink
-- `src/domain/persistence.ts`: saved-state repository abstraction สำหรับ load/save/clear และ failure-safe fallback
+- `src/domain/persistence.ts`: saved-state repository abstraction (`local-browser` และ `remote-backend` contract) สำหรับ load/save/clear และ failure-safe fallback
+- `src/domain/persistence-model.ts`: versioned persistence envelope (`schemaVersion`) และ payload migration logic
 - `src/domain/types.ts`: shared types ระหว่าง app และ domain
 
 ขั้นถัดไปคือเลือกว่าจะเพิ่ม auth provider จริง backend persistence หรือ analytics sink จริง โดยยังรักษา migration path จาก guest `localStorage`

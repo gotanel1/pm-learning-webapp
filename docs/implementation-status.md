@@ -32,6 +32,8 @@
 - Analytics events now include `mission_answered` and `mission_completed` through the existing dev console sink.
 - Saved-state persistence is now routed through a domain repository abstraction instead of direct `localStorage` calls in the UI component.
 - Persistence tests now cover successful load/save/clear behavior and failure-safe fallback paths.
+- Persistence payload now uses a versioned envelope for backend-ready serialization while still reading legacy raw state payloads.
+- Remote repository contract is defined (`remote-backend` mode) for future adapter wiring without changing UI state handling.
 
 ## Current App Capabilities
 
@@ -52,6 +54,7 @@
 - Mission completion state saved in browser `localStorage`
 - One-time mission XP reward after quiz completion with duplicate reward protection
 - Persistence abstraction layer ready for future backend adapter replacement
+- Versioned state payload contract for backend mapping and migration
 
 ## Next Phase
 

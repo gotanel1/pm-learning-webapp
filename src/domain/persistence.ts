@@ -1,4 +1,8 @@
-import { normalizeSavedState } from "./practice";
+import {
+  fromPersistedStatePayload,
+  toSavedStateEnvelope,
+  type SavedStateEnvelopeV1,
+} from "./persistence-model";
 import type { SavedState } from "./types";
 
 export type KeyValueStorage = {
@@ -16,6 +20,12 @@ export type SavedStateRepository = {
   clear: () => void;
 };
 
+export type RemoteSavedStateAdapter = {
+  load: (userId: string) => SavedStateEnvelopeV1 | SavedState | null;
+  save: (userId: string, value: SavedStateEnvelopeV1) => void;
+  clear: (userId: string) => void;
+};
+
 type Logger = Pick<typeof console, "warn">;
 
 function safeParseSavedState(
@@ -24,7 +34,7 @@ function safeParseSavedState(
   logger: Logger,
 ): SavedState {
   try {
-    return normalizeSavedState(JSON.parse(value), fallback);
+    return fromPersistedStatePayload(JSON.parse(value), fallback);
   } catch (error) {
     logger.warn("Failed to parse saved progress payload.", error);
     return fallback;
@@ -53,7 +63,7 @@ export function createSavedStateRepository(
       if (!storage) return;
 
       try {
-        storage.setItem(key, JSON.stringify(state));
+        storage.setItem(key, JSON.stringify(toSavedStateEnvelope(state)));
       } catch (error) {
         logger.warn("Failed to save progress.", error);
       }
@@ -79,4 +89,37 @@ export function createBrowserSavedStateRepository(
   }
 
   return createSavedStateRepository(key, window.localStorage, logger);
+}
+
+export function createRemoteSavedStateRepository(
+  userId: string,
+  adapter: RemoteSavedStateAdapter,
+  logger: Logger = console,
+): SavedStateRepository {
+  return {
+    mode: "remote-backend",
+    load(fallback) {
+      try {
+        const saved = adapter.load(userId);
+        return saved ? fromPersistedStatePayload(saved, fallback) : fallback;
+      } catch (error) {
+        logger.warn("Failed to load remote progress.", error);
+        return fallback;
+      }
+    },
+    save(state) {
+      try {
+        adapter.save(userId, toSavedStateEnvelope(state));
+      } catch (error) {
+        logger.warn("Failed to save remote progress.", error);
+      }
+    },
+    clear() {
+      try {
+        adapter.clear(userId);
+      } catch (error) {
+        logger.warn("Failed to clear remote progress.", error);
+      }
+    },
+  };
 }

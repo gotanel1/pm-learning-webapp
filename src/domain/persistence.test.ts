@@ -1,8 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import { DEFAULT_PREFERENCES } from "./preferences";
 import {
+  createRemoteSavedStateRepository,
   createSavedStateRepository,
   type KeyValueStorage,
+  type RemoteSavedStateAdapter,
 } from "./persistence";
 import { DEFAULT_PROFILE } from "./session";
 import type { SavedState } from "./types";
@@ -93,7 +95,9 @@ describe("saved state persistence", () => {
     );
 
     repository.save({ ...fallback, xp: 99 });
-    expect(read("pm-duolingo-progress-v2")).toContain("\"xp\":99");
+    const raw = read("pm-duolingo-progress-v2");
+    expect(raw).toContain("\"schemaVersion\":1");
+    expect(raw).toContain("\"xp\":99");
 
     repository.clear();
     expect(read("pm-duolingo-progress-v2")).toBeNull();
@@ -119,6 +123,60 @@ describe("saved state persistence", () => {
     );
 
     expect(() => repository.load(fallback)).not.toThrow();
+    expect(() => repository.save(fallback)).not.toThrow();
+    expect(() => repository.clear()).not.toThrow();
+    expect(warn).toHaveBeenCalledTimes(3);
+  });
+
+  it("loads, saves, and clears through remote adapter contract", () => {
+    const adapter: RemoteSavedStateAdapter = {
+      load: vi.fn(() => ({
+        schemaVersion: 1 as const,
+        savedAt: "2026-05-17T00:00:00.000Z",
+        data: { ...fallback, xp: 20, activeLessonId: "lesson-2" },
+      })),
+      save: vi.fn(),
+      clear: vi.fn(),
+    };
+
+    const repository = createRemoteSavedStateRepository("user-1", adapter);
+    const loaded = repository.load(fallback);
+    repository.save({ ...fallback, xp: 80 });
+    repository.clear();
+
+    expect(repository.mode).toBe("remote-backend");
+    expect(loaded.activeLessonId).toBe("lesson-2");
+    expect(loaded.xp).toBe(20);
+    expect(adapter.save).toHaveBeenCalledWith(
+      "user-1",
+      expect.objectContaining({
+        schemaVersion: 1,
+        data: expect.objectContaining({ xp: 80 }),
+      }),
+    );
+    expect(adapter.clear).toHaveBeenCalledWith("user-1");
+  });
+
+  it("falls back when remote adapter throws", () => {
+    const adapter: RemoteSavedStateAdapter = {
+      load: vi.fn(() => {
+        throw new Error("load failed");
+      }),
+      save: vi.fn(() => {
+        throw new Error("save failed");
+      }),
+      clear: vi.fn(() => {
+        throw new Error("clear failed");
+      }),
+    };
+    const warn = vi.fn();
+    const repository = createRemoteSavedStateRepository(
+      "user-1",
+      adapter,
+      { warn },
+    );
+
+    expect(repository.load(fallback)).toBe(fallback);
     expect(() => repository.save(fallback)).not.toThrow();
     expect(() => repository.clear()).not.toThrow();
     expect(warn).toHaveBeenCalledTimes(3);

@@ -49,6 +49,7 @@ MVP ต้องพิสูจน์ว่า user สามารถ:
 - เพิ่ม analytics events สำหรับ `mission_answered` และ `mission_completed`
 - แยก persistence เป็น domain repository abstraction เพื่อลด coupling จาก UI ไป `localStorage` โดยตรง
 - เพิ่ม unit tests สำหรับ persistence load/save/clear และ failure fallback
+- เพิ่ม versioned persistence payload (`schemaVersion`) และ remote adapter contract เพื่อเตรียม cross-device/backend sync
 
 ## Remaining Major Work
 
