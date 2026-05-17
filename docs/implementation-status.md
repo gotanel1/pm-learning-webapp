@@ -35,6 +35,7 @@
 - Persistence payload now uses a versioned envelope for backend-ready serialization while still reading legacy raw state payloads.
 - Remote repository contract is defined (`remote-backend` mode) for future adapter wiring without changing UI state handling.
 - Repository selection now follows learner session mode (`guest` -> local, `authenticated` -> remote adapter when configured).
+- Auth/session binding contract is now defined in domain with a default `guest-only` strategy and provider-ready mapping path.
 
 ## Current App Capabilities
 

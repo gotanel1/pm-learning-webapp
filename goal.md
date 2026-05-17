@@ -50,6 +50,7 @@ MVP ต้องพิสูจน์ว่า user สามารถ:
 - แยก persistence เป็น domain repository abstraction เพื่อลด coupling จาก UI ไป `localStorage` โดยตรง
 - เพิ่ม unit tests สำหรับ persistence load/save/clear และ failure fallback
 - เพิ่ม versioned persistence payload (`schemaVersion`) และ remote adapter contract เพื่อเตรียม cross-device/backend sync
+- เพิ่ม auth/session binding contract (default guest-only, provider-ready path) เพื่อเตรียมผูก login จริง
 
 ## Remaining Major Work
 

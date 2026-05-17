@@ -27,6 +27,11 @@ import {
   normalizeLearnerProfile,
   updateLearnerProfile,
 } from "@/domain/session";
+import {
+  DEFAULT_AUTH_STRATEGY,
+  resolveLearnerProfileFromSession,
+  type AuthSessionSnapshot,
+} from "@/domain/session-binding";
 import type {
   AnswerLabel,
   DailyTarget,
@@ -129,9 +134,33 @@ const dailyTargetOptions: Array<{
 ];
 
 function loadInitialState(): SavedState {
-  return selectSavedStateRepository(starterState.profile, {
+  const authSession = getAuthSessionSnapshot();
+  const runtimeProfile = resolveLearnerProfileFromSession(
+    starterState.profile,
+    DEFAULT_AUTH_STRATEGY,
+    authSession,
+  );
+  const fallbackState = {
+    ...starterState,
+    profile: runtimeProfile,
+  };
+  const loadedState = selectSavedStateRepository(runtimeProfile, {
     localKey: STORAGE_KEY,
-  }).load(starterState);
+  }).load(fallbackState);
+
+  return {
+    ...loadedState,
+    profile: resolveLearnerProfileFromSession(
+      loadedState.profile,
+      DEFAULT_AUTH_STRATEGY,
+      authSession,
+    ),
+  };
+}
+
+function getAuthSessionSnapshot(): AuthSessionSnapshot {
+  // Placeholder contract: wire this to a real auth provider snapshot in the auth phase.
+  return null;
 }
 
 function getInitials(title: string) {
@@ -182,9 +211,18 @@ export default function Home() {
   useEffect(() => {
     if (!hasLoadedSavedState) return;
 
-    selectSavedStateRepository(state.profile, {
+    const runtimeProfile = resolveLearnerProfileFromSession(
+      state.profile,
+      DEFAULT_AUTH_STRATEGY,
+      getAuthSessionSnapshot(),
+    );
+
+    selectSavedStateRepository(runtimeProfile, {
       localKey: STORAGE_KEY,
-    }).save(state);
+    }).save({
+      ...state,
+      profile: runtimeProfile,
+    });
   }, [hasLoadedSavedState, state]);
 
   const completedSet = useMemo(
@@ -296,7 +334,13 @@ export default function Home() {
     setDraftDisplayName(DEFAULT_PROFILE.displayName);
     setSelectedIndex(null);
     setSelectedMissionIndex(null);
-    selectSavedStateRepository(state.profile, {
+    const runtimeProfile = resolveLearnerProfileFromSession(
+      state.profile,
+      DEFAULT_AUTH_STRATEGY,
+      getAuthSessionSnapshot(),
+    );
+
+    selectSavedStateRepository(runtimeProfile, {
       localKey: STORAGE_KEY,
     }).clear();
   }

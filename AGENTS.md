@@ -192,7 +192,7 @@ When adding features, protect these core product expectations:
 
 - `src/app/page.tsx`: current one-page learning app with guest profile and onboarding
 - `src/app/lessons.ts`: 30-day lesson seed content and quiz choices
-- `src/domain/`: testable domain rules for lessons, missions, progress, rewards, practice notes, preferences, session profile, persistence, and analytics events
+- `src/domain/`: testable domain rules for lessons, missions, progress, rewards, practice notes, preferences, session profile, session binding, persistence, and analytics events
 - `src/app/layout.tsx`: metadata and root layout
 - `src/app/globals.css`: Tailwind import and global tokens
 - `docs/prd-pm-duolingo-webapp.md`: product requirements
