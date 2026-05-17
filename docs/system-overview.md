@@ -23,7 +23,7 @@
 
 1. `src/app/page.tsx` โหลด lesson seed จาก `src/app/lessons.ts`
 2. initial render ใช้ `starterState` เพื่อให้ server/client hydration ตรงกัน
-3. หลัง mount แล้ว component อ่าน progress เดิมผ่าน persistence abstraction (`src/domain/persistence.ts`) จาก key `pm-duolingo-progress-v2`
+3. หลัง mount แล้ว component เลือก repository ตาม session profile แล้วอ่าน progress เดิมผ่าน persistence abstraction (`src/domain/persistence.ts`) จาก key `pm-duolingo-progress-v2`
 4. ถ้าไม่มีข้อมูลเดิม ระบบใช้ `starterState`
 5. ระบบ migrate หรือสร้าง `LearnerProfile` default สำหรับ guest session
 6. ถ้า onboarding ยังไม่ complete ผู้ใช้ตั้งระดับพื้นฐาน เป้าหมาย และจำนวนบทต่อวัน
@@ -182,7 +182,7 @@ Domain logic ถูกแยกออกจากหน้า UI แล้วบ
 - `src/domain/preferences.ts`: default preferences, preference normalization และ onboarding completion
 - `src/domain/session.ts`: default guest profile, profile normalization และ local profile update
 - `src/domain/analytics.ts`: event contract, event creation และ dev console tracking sink
-- `src/domain/persistence.ts`: saved-state repository abstraction (`local-browser` และ `remote-backend` contract) สำหรับ load/save/clear และ failure-safe fallback
+- `src/domain/persistence.ts`: saved-state repository abstraction (`local-browser` และ `remote-backend` contract) พร้อม session-based repository selection
 - `src/domain/persistence-model.ts`: versioned persistence envelope (`schemaVersion`) และ payload migration logic
 - `src/domain/types.ts`: shared types ระหว่าง app และ domain
 

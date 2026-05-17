@@ -3,7 +3,9 @@ import { DEFAULT_PREFERENCES } from "./preferences";
 import {
   createRemoteSavedStateRepository,
   createSavedStateRepository,
+  selectSavedStateRepository,
   type KeyValueStorage,
+  type PersistenceSelectionOptions,
   type RemoteSavedStateAdapter,
 } from "./persistence";
 import { DEFAULT_PROFILE } from "./session";
@@ -180,5 +182,64 @@ describe("saved state persistence", () => {
     expect(() => repository.save(fallback)).not.toThrow();
     expect(() => repository.clear()).not.toThrow();
     expect(warn).toHaveBeenCalledTimes(3);
+  });
+
+  it("selects local repository for guest profile", () => {
+    const options: PersistenceSelectionOptions = {
+      localKey: "pm-duolingo-progress-v2",
+    };
+
+    const repository = selectSavedStateRepository(
+      { ...DEFAULT_PROFILE, sessionMode: "guest" },
+      options,
+    );
+
+    expect(repository.mode).toBe("local-browser");
+  });
+
+  it("selects remote repository for authenticated profile when adapter is configured", () => {
+    const adapter: RemoteSavedStateAdapter = {
+      load: vi.fn(() => null),
+      save: vi.fn(),
+      clear: vi.fn(),
+    };
+    const options: PersistenceSelectionOptions = {
+      localKey: "pm-duolingo-progress-v2",
+      remoteAuthenticatedAdapter: adapter,
+    };
+
+    const repository = selectSavedStateRepository(
+      {
+        userId: "user-1",
+        displayName: "Auth User",
+        sessionMode: "authenticated",
+      },
+      options,
+    );
+
+    expect(repository.mode).toBe("remote-backend");
+  });
+
+  it("falls back to local repository when authenticated adapter is missing", () => {
+    const warn = vi.fn();
+    const options: PersistenceSelectionOptions = {
+      localKey: "pm-duolingo-progress-v2",
+      remoteAuthenticatedAdapter: null,
+      logger: { warn },
+    };
+
+    const repository = selectSavedStateRepository(
+      {
+        userId: "user-1",
+        displayName: "Auth User",
+        sessionMode: "authenticated",
+      },
+      options,
+    );
+
+    expect(repository.mode).toBe("local-browser");
+    expect(warn).toHaveBeenCalledWith(
+      "No authenticated persistence adapter configured. Falling back to local browser storage.",
+    );
   });
 });

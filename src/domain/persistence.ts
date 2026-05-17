@@ -3,6 +3,7 @@ import {
   toSavedStateEnvelope,
   type SavedStateEnvelopeV1,
 } from "./persistence-model";
+import type { LearnerProfile } from "./types";
 import type { SavedState } from "./types";
 
 export type KeyValueStorage = {
@@ -24,6 +25,12 @@ export type RemoteSavedStateAdapter = {
   load: (userId: string) => SavedStateEnvelopeV1 | SavedState | null;
   save: (userId: string, value: SavedStateEnvelopeV1) => void;
   clear: (userId: string) => void;
+};
+
+export type PersistenceSelectionOptions = {
+  localKey: string;
+  remoteAuthenticatedAdapter?: RemoteSavedStateAdapter | null;
+  logger?: Logger;
 };
 
 type Logger = Pick<typeof console, "warn">;
@@ -122,4 +129,33 @@ export function createRemoteSavedStateRepository(
       }
     },
   };
+}
+
+export function selectSavedStateRepository(
+  profile: LearnerProfile,
+  options: PersistenceSelectionOptions,
+): SavedStateRepository {
+  const logger = options.logger ?? console;
+
+  if (
+    profile.sessionMode === "authenticated" &&
+    options.remoteAuthenticatedAdapter
+  ) {
+    return createRemoteSavedStateRepository(
+      profile.userId,
+      options.remoteAuthenticatedAdapter,
+      logger,
+    );
+  }
+
+  if (
+    profile.sessionMode === "authenticated" &&
+    !options.remoteAuthenticatedAdapter
+  ) {
+    logger.warn(
+      "No authenticated persistence adapter configured. Falling back to local browser storage.",
+    );
+  }
+
+  return createBrowserSavedStateRepository(options.localKey, logger);
 }

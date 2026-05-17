@@ -34,6 +34,7 @@
 - Persistence tests now cover successful load/save/clear behavior and failure-safe fallback paths.
 - Persistence payload now uses a versioned envelope for backend-ready serialization while still reading legacy raw state payloads.
 - Remote repository contract is defined (`remote-backend` mode) for future adapter wiring without changing UI state handling.
+- Repository selection now follows learner session mode (`guest` -> local, `authenticated` -> remote adapter when configured).
 
 ## Current App Capabilities
 

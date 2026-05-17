@@ -8,7 +8,7 @@ import {
   getProgressPercent,
   isLessonUnlocked,
 } from "@/domain/progress";
-import { createBrowserSavedStateRepository } from "@/domain/persistence";
+import { selectSavedStateRepository } from "@/domain/persistence";
 import {
   getPracticeNote,
   savePracticeNote,
@@ -129,7 +129,9 @@ const dailyTargetOptions: Array<{
 ];
 
 function loadInitialState(): SavedState {
-  return createBrowserSavedStateRepository(STORAGE_KEY).load(starterState);
+  return selectSavedStateRepository(starterState.profile, {
+    localKey: STORAGE_KEY,
+  }).load(starterState);
 }
 
 function getInitials(title: string) {
@@ -180,7 +182,9 @@ export default function Home() {
   useEffect(() => {
     if (!hasLoadedSavedState) return;
 
-    createBrowserSavedStateRepository(STORAGE_KEY).save(state);
+    selectSavedStateRepository(state.profile, {
+      localKey: STORAGE_KEY,
+    }).save(state);
   }, [hasLoadedSavedState, state]);
 
   const completedSet = useMemo(
@@ -292,7 +296,9 @@ export default function Home() {
     setDraftDisplayName(DEFAULT_PROFILE.displayName);
     setSelectedIndex(null);
     setSelectedMissionIndex(null);
-    createBrowserSavedStateRepository(STORAGE_KEY).clear();
+    selectSavedStateRepository(state.profile, {
+      localKey: STORAGE_KEY,
+    }).clear();
   }
 
   function savePractice(value: string) {
