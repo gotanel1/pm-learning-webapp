@@ -11,7 +11,7 @@
 - `src/app/layout.tsx`: root layout, metadata, font setup
 - `src/app/page.tsx`: client-side app สำหรับ guest profile, onboarding, learning path, quiz, feedback, XP/streak, progress และ practice note
 - `src/app/lessons.ts`: seed content ของบทเรียน 30 วัน พร้อมคำถาม ตัวเลือก feedback และ practice prompt
-- `src/domain/`: domain logic สำหรับ lesson choices, scenario missions, progress, rewards, practice notes, user preferences, learner session, analytics events และ shared types
+- `src/domain/`: domain logic สำหรับ lesson choices, scenario missions, progress, rewards, practice notes, saved-state persistence, user preferences, learner session, analytics events และ shared types
 - `src/app/globals.css`: global styles, Tailwind CSS import, focus/selection styles
 - `public/`: static assets จาก Next scaffold
 
@@ -23,7 +23,7 @@
 
 1. `src/app/page.tsx` โหลด lesson seed จาก `src/app/lessons.ts`
 2. initial render ใช้ `starterState` เพื่อให้ server/client hydration ตรงกัน
-3. หลัง mount แล้ว component อ่าน progress เดิมจาก `localStorage` key `pm-duolingo-progress-v2`
+3. หลัง mount แล้ว component อ่าน progress เดิมผ่าน persistence abstraction (`src/domain/persistence.ts`) จาก key `pm-duolingo-progress-v2`
 4. ถ้าไม่มีข้อมูลเดิม ระบบใช้ `starterState`
 5. ระบบ migrate หรือสร้าง `LearnerProfile` default สำหรับ guest session
 6. ถ้า onboarding ยังไม่ complete ผู้ใช้ตั้งระดับพื้นฐาน เป้าหมาย และจำนวนบทต่อวัน
@@ -31,7 +31,7 @@
 8. ผู้ใช้ตอบ quiz
 9. ถ้าตอบถูก ระบบเพิ่ม lesson id เข้า `completedIds`, เพิ่ม XP และปรับ streak
 10. หลัง lesson completed แล้ว ถ้าตอบ scenario mission ถูก ระบบเพิ่ม mission id เข้า `completedMissionIds` และเพิ่ม one-time mission XP
-11. state ถูกเขียนกลับเข้า `localStorage`
+11. state ถูกเขียนกลับผ่าน persistence abstraction ไปที่ browser `localStorage`
 12. ผู้ใช้สามารถไปบทถัดไป เขียน practice note ปรับ Learner Plan หรือแก้ display name ได้
 13. action สำคัญของ learning loop จะเรียก analytics abstraction และส่ง event เข้า dev console
 
@@ -182,6 +182,7 @@ Domain logic ถูกแยกออกจากหน้า UI แล้วบ
 - `src/domain/preferences.ts`: default preferences, preference normalization และ onboarding completion
 - `src/domain/session.ts`: default guest profile, profile normalization และ local profile update
 - `src/domain/analytics.ts`: event contract, event creation และ dev console tracking sink
+- `src/domain/persistence.ts`: saved-state repository abstraction สำหรับ load/save/clear และ failure-safe fallback
 - `src/domain/types.ts`: shared types ระหว่าง app และ domain
 
 ขั้นถัดไปคือเลือกว่าจะเพิ่ม auth provider จริง backend persistence หรือ analytics sink จริง โดยยังรักษา migration path จาก guest `localStorage`

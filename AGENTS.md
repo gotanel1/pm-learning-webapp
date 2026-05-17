@@ -20,7 +20,7 @@
 - UI: React Client Component หลักที่ `src/app/page.tsx`
 - Content seed: `src/app/lessons.ts`
 - Styling: Tailwind CSS v4 ผ่าน `src/app/globals.css`
-- Current storage: browser `localStorage`
+- Current storage: browser `localStorage` ผ่าน persistence abstraction ใน domain layer
 - Current app state: prototype ที่ทำ guest profile, onboarding, learner preferences, quiz completion, mission completion และ learning loop ได้ในหน้าเดียว
 
 ยังไม่มี backend, database, auth จริง, server API หรือ production analytics provider ในรอบนี้
@@ -192,7 +192,7 @@ When adding features, protect these core product expectations:
 
 - `src/app/page.tsx`: current one-page learning app with guest profile and onboarding
 - `src/app/lessons.ts`: 30-day lesson seed content and quiz choices
-- `src/domain/`: testable domain rules for lessons, missions, progress, rewards, practice notes, preferences, session profile, and analytics events
+- `src/domain/`: testable domain rules for lessons, missions, progress, rewards, practice notes, preferences, session profile, persistence, and analytics events
 - `src/app/layout.tsx`: metadata and root layout
 - `src/app/globals.css`: Tailwind import and global tokens
 - `docs/prd-pm-duolingo-webapp.md`: product requirements

@@ -2,8 +2,8 @@
 
 ## Current Branch
 
-- Branch: `codex/mission-completion-rewards`
-- Phase: Mission completion and reward rules
+- Branch: `codex/persistence-foundation`
+- Phase: Persistence abstraction foundation
 - GitHub repo: `gotanel1/pm-learning-webapp`
 
 ## Completed
@@ -30,6 +30,8 @@
 - Mission completion is now stored separately from lesson completion through `completedMissionIds`.
 - Correct mission answers award one-time mission XP after lesson completion and do not duplicate rewards after reload or repeat attempts.
 - Analytics events now include `mission_answered` and `mission_completed` through the existing dev console sink.
+- Saved-state persistence is now routed through a domain repository abstraction instead of direct `localStorage` calls in the UI component.
+- Persistence tests now cover successful load/save/clear behavior and failure-safe fallback paths.
 
 ## Current App Capabilities
 
@@ -49,13 +51,14 @@
 - Practice note area separated from mission decision feedback
 - Mission completion state saved in browser `localStorage`
 - One-time mission XP reward after quiz completion with duplicate reward protection
+- Persistence abstraction layer ready for future backend adapter replacement
 
 ## Next Phase
 
 Choose the next implementation slice after this branch is merged:
 
 - Add real auth provider and backend persistence.
-- Decide whether mission completion should gate lesson unlock/next navigation.
+- Add backend-ready progress model and mapping for cross-device persistence.
 - Replace the dev console analytics sink with a real provider/backend after an explicit vendor decision.
 - Keep the `localStorage` migration stable until auth/persistence is implemented.
 - Add a full browser E2E runner when the app grows beyond the current single-page MVP.

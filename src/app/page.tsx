@@ -8,9 +8,9 @@ import {
   getProgressPercent,
   isLessonUnlocked,
 } from "@/domain/progress";
+import { createBrowserSavedStateRepository } from "@/domain/persistence";
 import {
   getPracticeNote,
-  normalizeSavedState,
   savePracticeNote,
 } from "@/domain/practice";
 import {
@@ -129,17 +129,7 @@ const dailyTargetOptions: Array<{
 ];
 
 function loadInitialState(): SavedState {
-  if (typeof window === "undefined") return starterState;
-
-  try {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    return saved
-      ? normalizeSavedState(JSON.parse(saved), starterState)
-      : starterState;
-  } catch (error) {
-    console.warn("Failed to load saved progress.", error);
-    return starterState;
-  }
+  return createBrowserSavedStateRepository(STORAGE_KEY).load(starterState);
 }
 
 function getInitials(title: string) {
@@ -190,11 +180,7 @@ export default function Home() {
   useEffect(() => {
     if (!hasLoadedSavedState) return;
 
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (error) {
-      console.warn("Failed to save progress.", error);
-    }
+    createBrowserSavedStateRepository(STORAGE_KEY).save(state);
   }, [hasLoadedSavedState, state]);
 
   const completedSet = useMemo(
@@ -306,11 +292,7 @@ export default function Home() {
     setDraftDisplayName(DEFAULT_PROFILE.displayName);
     setSelectedIndex(null);
     setSelectedMissionIndex(null);
-    try {
-      window.localStorage.removeItem(STORAGE_KEY);
-    } catch (error) {
-      console.warn("Failed to reset saved progress.", error);
-    }
+    createBrowserSavedStateRepository(STORAGE_KEY).clear();
   }
 
   function savePractice(value: string) {
