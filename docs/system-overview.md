@@ -30,9 +30,10 @@
 7. ผู้ใช้เลือกบทเรียนที่ unlock แล้วได้จาก Learning Path
 8. ผู้ใช้ตอบ quiz
 9. ถ้าตอบถูก ระบบเพิ่ม lesson id เข้า `completedIds`, เพิ่ม XP และปรับ streak
-10. state ถูกเขียนกลับเข้า `localStorage`
-11. ผู้ใช้สามารถไปบทถัดไป เขียน practice note ปรับ Learner Plan หรือแก้ display name ได้
-12. action สำคัญของ learning loop จะเรียก analytics abstraction และส่ง event เข้า dev console
+10. หลัง lesson completed แล้ว ถ้าตอบ scenario mission ถูก ระบบเพิ่ม mission id เข้า `completedMissionIds` และเพิ่ม one-time mission XP
+11. state ถูกเขียนกลับเข้า `localStorage`
+12. ผู้ใช้สามารถไปบทถัดไป เขียน practice note ปรับ Learner Plan หรือแก้ display name ได้
+13. action สำคัญของ learning loop จะเรียก analytics abstraction และส่ง event เข้า dev console
 
 ## Current Data Shape
 
@@ -80,6 +81,7 @@ type ScenarioMission = {
 type SavedState = {
   activeLessonId: string;
   completedIds: string[];
+  completedMissionIds: string[];
   xp: number;
   streak: number;
   practiceNotes: Record<string, string>;
@@ -149,6 +151,7 @@ Event sink ปัจจุบันเป็น dev console only ยังไม
 - Display name editing ที่บันทึกใน browser เดิม
 - Analytics event abstraction สำหรับ MVP learning loop ผ่าน dev console sink
 - Scenario Mission แบบ structured choice พร้อม feedback ทันที
+- Mission completion persistence พร้อม one-time mission XP หลัง quiz ผ่าน และ duplicate reward protection
 - Practice Note แยกจาก mission decision เพื่อให้ผู้เรียนลงมือเขียนคำตอบจริง
 - Reset progress
 
@@ -160,11 +163,11 @@ Event sink ปัจจุบันเป็น dev console only ยังไม
 - ยังไม่มี backend API
 - ยังไม่มี database หรือ cross-device sync
 - ยังไม่ได้เลือก auth provider
-- ยังไม่มี scenario mission engine แยกจาก quiz
+- ยังไม่มี hand-authored mission content แยกทีละบทจาก generated seed
 - ยังไม่มี profile progress page แยก
 - ยังไม่มี analytics provider จริง
 - ยังไม่มี analytics event persistence หรือ dashboard
-- ยังไม่มี mission completion persistence/reward ledger แยกจาก lesson completion
+- ยังไม่ได้ตัดสินใจว่า mission completion ต้อง gate lesson unlock หรือเป็น bonus reward
 - ยังไม่มี admin/content manager workflow
 
 ## Domain Logic
@@ -174,7 +177,7 @@ Domain logic ถูกแยกออกจากหน้า UI แล้วบ
 - `src/domain/lessons.ts`: สร้าง choices และกระจายตำแหน่งคำตอบถูก
 - `src/domain/missions.ts`: สร้าง scenario mission แบบ deterministic จาก lesson seed
 - `src/domain/progress.ts`: lesson unlock, progress percent และ next-step gating
-- `src/domain/rewards.ts`: complete lesson, XP และ streak rules
+- `src/domain/rewards.ts`: complete lesson, complete mission, XP และ duplicate reward rules
 - `src/domain/practice.ts`: normalize saved progress และจัดการ practice notes ราย lesson
 - `src/domain/preferences.ts`: default preferences, preference normalization และ onboarding completion
 - `src/domain/session.ts`: default guest profile, profile normalization และ local profile update

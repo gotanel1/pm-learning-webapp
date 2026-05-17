@@ -48,6 +48,7 @@ export type LessonSeed = Omit<Lesson, "choices" | "mission"> & {
 export type SavedState = {
   activeLessonId: string;
   completedIds: string[];
+  completedMissionIds: string[];
   xp: number;
   streak: number;
   practiceNotes: Record<string, string>;

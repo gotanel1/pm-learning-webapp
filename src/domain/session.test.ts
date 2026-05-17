@@ -10,6 +10,7 @@ import type { SavedState } from "./types";
 const baseState: SavedState = {
   activeLessonId: "lesson-1",
   completedIds: ["lesson-1"],
+  completedMissionIds: ["lesson-1-mission"],
   xp: 20,
   streak: 1,
   practiceNotes: { "lesson-1": "practice note" },
@@ -57,6 +58,9 @@ describe("learner session", () => {
       displayName: "Product Tana",
     });
     expect(nextState.completedIds).toEqual(baseState.completedIds);
+    expect(nextState.completedMissionIds).toEqual(
+      baseState.completedMissionIds,
+    );
     expect(nextState.xp).toBe(baseState.xp);
     expect(nextState.streak).toBe(baseState.streak);
     expect(nextState.preferences).toBe(baseState.preferences);

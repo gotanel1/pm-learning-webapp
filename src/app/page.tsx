@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { trackEvent } from "@/domain/analytics";
 import {
+  canAnswerMission,
   canMoveNext,
   getProgressPercent,
   isLessonUnlocked,
@@ -16,7 +17,11 @@ import {
   DEFAULT_PREFERENCES,
   completeOnboarding,
 } from "@/domain/preferences";
-import { completeLesson } from "@/domain/rewards";
+import {
+  MISSION_COMPLETION_XP,
+  completeLesson,
+  completeMission,
+} from "@/domain/rewards";
 import {
   DEFAULT_PROFILE,
   normalizeLearnerProfile,
@@ -38,6 +43,7 @@ const ANSWER_LABELS = ["A", "B", "C", "D"] as const satisfies readonly AnswerLab
 const starterState: SavedState = {
   activeLessonId: lessons[0].id,
   completedIds: [],
+  completedMissionIds: [],
   xp: 0,
   streak: 1,
   practiceNotes: {},
@@ -195,6 +201,10 @@ export default function Home() {
     () => new Set(state.completedIds),
     [state.completedIds],
   );
+  const completedMissionSet = useMemo(
+    () => new Set(state.completedMissionIds),
+    [state.completedMissionIds],
+  );
   const activeLesson =
     lessons.find((lesson) => lesson.id === state.activeLessonId) ?? lessons[0];
   const activeIndex = lessons.findIndex((lesson) => lesson.id === activeLesson.id);
@@ -206,11 +216,14 @@ export default function Home() {
     selectedMissionIndex === null
       ? null
       : activeLesson.mission.choices[selectedMissionIndex];
-  const progressPercent = getProgressPercent(completedCount, totalLessons);
-  const canGoNext = canMoveNext(
-    selectedChoice,
-    completedSet.has(activeLesson.id),
+  const isLessonCompleted = completedSet.has(activeLesson.id);
+  const isMissionCompleted = completedMissionSet.has(activeLesson.mission.id);
+  const canAttemptMission = canAnswerMission(
+    isLessonCompleted,
+    isMissionCompleted,
   );
+  const progressPercent = getProgressPercent(completedCount, totalLessons);
+  const canGoNext = canMoveNext(selectedChoice, isLessonCompleted);
   const activePracticeNote = getPracticeNote(state, activeLesson.id);
 
   function selectLesson(lesson: Lesson) {
@@ -361,7 +374,36 @@ export default function Home() {
   }
 
   function answerMission(index: number) {
+    if (!canAttemptMission) return;
+
     setSelectedMissionIndex(index);
+    const missionChoice = activeLesson.mission.choices[index];
+
+    trackEvent("mission_answered", {
+      userId: state.profile.userId,
+      sessionMode: state.profile.sessionMode,
+      lessonId: activeLesson.id,
+      missionId: activeLesson.mission.id,
+      lessonIndex: activeIndex,
+      completedCount,
+      xp: state.xp,
+      answerCorrect: missionChoice.correct,
+      answerLabel: getAnswerLabel(index),
+    });
+
+    if (!missionChoice.correct) return;
+
+    const nextState = completeMission(state, activeLesson.mission);
+    setState(nextState);
+    trackEvent("mission_completed", {
+      userId: nextState.profile.userId,
+      sessionMode: nextState.profile.sessionMode,
+      lessonId: activeLesson.id,
+      missionId: activeLesson.mission.id,
+      lessonIndex: activeIndex,
+      completedCount: nextState.completedIds.length,
+      xp: nextState.xp,
+    });
   }
 
   return (
@@ -597,9 +639,24 @@ export default function Home() {
                 <p className="text-xs font-black uppercase tracking-[0.25em] text-purple-200">
                   Scenario Mission
                 </p>
-                <h3 className="mt-2 text-xl font-black">
-                  {activeLesson.mission.title}
-                </h3>
+                <div className="mt-2 flex items-start justify-between gap-3">
+                  <h3 className="text-xl font-black">
+                    {activeLesson.mission.title}
+                  </h3>
+                  <span
+                    className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-wider ${
+                      isMissionCompleted
+                        ? "bg-lime-300 text-slate-950"
+                        : "bg-purple-300/15 text-purple-100"
+                    }`}
+                  >
+                    {isMissionCompleted
+                      ? "Mission done"
+                      : isLessonCompleted
+                        ? `+${MISSION_COMPLETION_XP} XP`
+                        : "ผ่าน quiz ก่อน"}
+                  </span>
+                </div>
                 <p className="mt-3 rounded-2xl border border-white/10 bg-slate-950/45 p-4 text-sm leading-6 text-slate-200">
                   {activeLesson.mission.scenario}
                 </p>
@@ -610,13 +667,15 @@ export default function Home() {
                   {activeLesson.mission.choices.map((choice, index) => {
                     const isSelected = selectedMissionIndex === index;
                     const showCorrect =
-                      selectedMissionIndex !== null && choice.correct;
+                      (selectedMissionIndex !== null || isMissionCompleted) &&
+                      choice.correct;
                     const showWrong = isSelected && !choice.correct;
                     return (
                       <button
                         type="button"
                         key={choice.text}
                         onClick={() => answerMission(index)}
+                        disabled={!canAttemptMission}
                         data-testid={`mission-choice-${String.fromCharCode(65 + index)}`}
                         className={`rounded-2xl border p-3 text-left text-sm font-bold leading-6 transition ${
                           showCorrect
@@ -624,9 +683,9 @@ export default function Home() {
                             : showWrong
                               ? "border-rose-300 bg-rose-400/20 text-rose-50"
                               : isSelected
-                                ? "border-purple-300 bg-purple-400/15"
-                                : "border-white/10 bg-slate-950/35 hover:border-white/25 hover:bg-white/[0.08]"
-                        }`}
+                              ? "border-purple-300 bg-purple-400/15"
+                              : "border-white/10 bg-slate-950/35 hover:border-white/25 hover:bg-white/[0.08]"
+                        } disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-white/10 disabled:hover:bg-slate-950/35`}
                       >
                         <span className="mr-2 inline-grid h-6 w-6 place-items-center rounded-full bg-white/10 text-xs">
                           {String.fromCharCode(65 + index)}
@@ -636,6 +695,12 @@ export default function Home() {
                     );
                   })}
                 </div>
+
+                {!isLessonCompleted ? (
+                  <p className="mt-3 rounded-2xl border border-sky-300/25 bg-sky-300/10 p-3 text-sm leading-6 text-sky-50">
+                    ตอบ quiz ให้ถูกก่อน แล้ว mission จะเปิดให้เก็บ XP เพิ่ม
+                  </p>
+                ) : null}
 
                 {selectedMissionChoice ? (
                   <div
@@ -652,6 +717,13 @@ export default function Home() {
                     </p>
                     <p className="mt-1 text-sm leading-6 text-slate-100">
                       {selectedMissionChoice.feedback}
+                    </p>
+                  </div>
+                ) : isMissionCompleted ? (
+                  <div className="mt-3 rounded-2xl border border-lime-300/40 bg-lime-300/15 p-4">
+                    <p className="font-black">Mission completed ✅</p>
+                    <p className="mt-1 text-sm leading-6 text-slate-100">
+                      ระบบจำ mission นี้ไว้แล้ว และจะไม่ให้ XP ซ้ำเมื่อกลับมาตอบใหม่
                     </p>
                   </div>
                 ) : null}
@@ -734,7 +806,7 @@ export default function Home() {
                 <h3 className="mt-2 text-xl font-black">ภารกิจวันนี้</h3>
                 <ul className="mt-4 space-y-3 text-sm text-slate-200">
                   <MissionItem done={state.completedIds.length >= 1} text="จบบทเรียนอย่างน้อย 1 บท" />
-                  <MissionItem done={selectedMissionChoice?.correct ?? false} text="เลือกแนวทาง scenario mission ที่เหมาะสม" />
+                  <MissionItem done={isMissionCompleted} text="เลือกแนวทาง scenario mission ที่เหมาะสม" />
                   <MissionItem done={activePracticeNote.length >= 80} text="เขียน practice note อย่างน้อย 80 ตัวอักษร" />
                   <MissionItem done={progressPercent >= 30} text="ทำ path ให้ครบ 30% (9 บทแรก)" />
                 </ul>

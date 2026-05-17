@@ -4,7 +4,9 @@ export const ANALYTICS_EVENT_NAMES = [
   "onboarding_completed",
   "lesson_selected",
   "quiz_answered",
+  "mission_answered",
   "lesson_completed",
+  "mission_completed",
   "next_lesson_clicked",
   "practice_note_updated",
   "profile_updated",
@@ -17,6 +19,7 @@ export type AnalyticsEventPayload = {
   userId: string;
   sessionMode: SessionMode;
   lessonId?: string;
+  missionId?: string;
   targetLessonId?: string;
   lessonIndex?: number;
   completedCount?: number;

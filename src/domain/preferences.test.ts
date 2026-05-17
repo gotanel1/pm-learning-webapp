@@ -10,6 +10,7 @@ import type { SavedState } from "./types";
 const baseState: SavedState = {
   activeLessonId: "lesson-1",
   completedIds: [],
+  completedMissionIds: [],
   xp: 0,
   streak: 1,
   practiceNotes: {},

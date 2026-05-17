@@ -47,6 +47,11 @@ export function normalizeSavedState(
     completedIds: Array.isArray(saved.completedIds)
       ? saved.completedIds.filter((id): id is string => typeof id === "string")
       : fallback.completedIds,
+    completedMissionIds: Array.isArray(saved.completedMissionIds)
+      ? saved.completedMissionIds.filter(
+          (id): id is string => typeof id === "string",
+        )
+      : fallback.completedMissionIds,
     xp: typeof saved.xp === "number" ? saved.xp : fallback.xp,
     streak: typeof saved.streak === "number" ? saved.streak : fallback.streak,
     practiceNotes,

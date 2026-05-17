@@ -2,8 +2,8 @@
 
 ## Current Branch
 
-- Branch: `codex/content-mission-structure`
-- Phase: Content and structured mission foundation
+- Branch: `codex/mission-completion-rewards`
+- Phase: Mission completion and reward rules
 - GitHub repo: `gotanel1/pm-learning-webapp`
 
 ## Completed
@@ -27,6 +27,9 @@
 - Each lesson now includes a structured `ScenarioMission` generated from lesson seed content.
 - Scenario missions show selectable choices and immediate feedback before the learner writes a practice note.
 - Mission domain tests verify stable mission IDs, exactly one correct choice, and deterministic choice order.
+- Mission completion is now stored separately from lesson completion through `completedMissionIds`.
+- Correct mission answers award one-time mission XP after lesson completion and do not duplicate rewards after reload or repeat attempts.
+- Analytics events now include `mission_answered` and `mission_completed` through the existing dev console sink.
 
 ## Current App Capabilities
 
@@ -44,13 +47,15 @@
 - Stable smoke-test selectors for key learning-flow actions
 - Structured scenario mission card for every lesson
 - Practice note area separated from mission decision feedback
+- Mission completion state saved in browser `localStorage`
+- One-time mission XP reward after quiz completion with duplicate reward protection
 
 ## Next Phase
 
 Choose the next implementation slice after this branch is merged:
 
-- Add mission completion persistence and rewards if missions should gate progress.
 - Add real auth provider and backend persistence.
+- Decide whether mission completion should gate lesson unlock/next navigation.
 - Replace the dev console analytics sink with a real provider/backend after an explicit vendor decision.
 - Keep the `localStorage` migration stable until auth/persistence is implemented.
 - Add a full browser E2E runner when the app grows beyond the current single-page MVP.
