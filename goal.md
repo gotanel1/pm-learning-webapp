@@ -23,10 +23,10 @@ MVP ต้องพิสูจน์ว่า user สามารถ:
 
 ## Current Progress
 
-สถานะล่าสุดหลัง milestone `Mission Completion + Reward Rules`:
+สถานะล่าสุดหลัง milestone `Persistence Abstraction Foundation`:
 
-- Overall MVP ตาม PRD: ประมาณ `50%`
-- Local prototype ที่ยังไม่รวม auth/backend จริง: ประมาณ `84%`
+- Overall MVP ตาม PRD: ประมาณ `52%`
+- Local prototype ที่ยังไม่รวม auth/backend จริง: ประมาณ `86%`
 
 ## Completed So Far
 
@@ -47,6 +47,10 @@ MVP ต้องพิสูจน์ว่า user สามารถ:
 - บันทึก mission completion แยกจาก lesson completion
 - ให้ mission XP แบบ one-time หลัง quiz ผ่าน และกัน XP ซ้ำเมื่อกลับมาตอบใหม่
 - เพิ่ม analytics events สำหรับ `mission_answered` และ `mission_completed`
+- แยก persistence เป็น domain repository abstraction เพื่อลด coupling จาก UI ไป `localStorage` โดยตรง
+- เพิ่ม unit tests สำหรับ persistence load/save/clear และ failure fallback
+- เพิ่ม versioned persistence payload (`schemaVersion`) และ remote adapter contract เพื่อเตรียม cross-device/backend sync
+- เพิ่ม auth/session binding contract (default guest-only, provider-ready path) เพื่อเตรียมผูก login จริง
 
 ## Remaining Major Work
 

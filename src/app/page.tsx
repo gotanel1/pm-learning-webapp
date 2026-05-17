@@ -8,9 +8,9 @@ import {
   getProgressPercent,
   isLessonUnlocked,
 } from "@/domain/progress";
+import { selectSavedStateRepository } from "@/domain/persistence";
 import {
   getPracticeNote,
-  normalizeSavedState,
   savePracticeNote,
 } from "@/domain/practice";
 import {
@@ -27,6 +27,11 @@ import {
   normalizeLearnerProfile,
   updateLearnerProfile,
 } from "@/domain/session";
+import {
+  DEFAULT_AUTH_STRATEGY,
+  resolveLearnerProfileFromSession,
+  type AuthSessionSnapshot,
+} from "@/domain/session-binding";
 import type {
   AnswerLabel,
   DailyTarget,
@@ -129,17 +134,33 @@ const dailyTargetOptions: Array<{
 ];
 
 function loadInitialState(): SavedState {
-  if (typeof window === "undefined") return starterState;
+  const authSession = getAuthSessionSnapshot();
+  const runtimeProfile = resolveLearnerProfileFromSession(
+    starterState.profile,
+    DEFAULT_AUTH_STRATEGY,
+    authSession,
+  );
+  const fallbackState = {
+    ...starterState,
+    profile: runtimeProfile,
+  };
+  const loadedState = selectSavedStateRepository(runtimeProfile, {
+    localKey: STORAGE_KEY,
+  }).load(fallbackState);
 
-  try {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    return saved
-      ? normalizeSavedState(JSON.parse(saved), starterState)
-      : starterState;
-  } catch (error) {
-    console.warn("Failed to load saved progress.", error);
-    return starterState;
-  }
+  return {
+    ...loadedState,
+    profile: resolveLearnerProfileFromSession(
+      loadedState.profile,
+      DEFAULT_AUTH_STRATEGY,
+      authSession,
+    ),
+  };
+}
+
+function getAuthSessionSnapshot(): AuthSessionSnapshot {
+  // Placeholder contract: wire this to a real auth provider snapshot in the auth phase.
+  return null;
 }
 
 function getInitials(title: string) {
@@ -190,11 +211,18 @@ export default function Home() {
   useEffect(() => {
     if (!hasLoadedSavedState) return;
 
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (error) {
-      console.warn("Failed to save progress.", error);
-    }
+    const runtimeProfile = resolveLearnerProfileFromSession(
+      state.profile,
+      DEFAULT_AUTH_STRATEGY,
+      getAuthSessionSnapshot(),
+    );
+
+    selectSavedStateRepository(runtimeProfile, {
+      localKey: STORAGE_KEY,
+    }).save({
+      ...state,
+      profile: runtimeProfile,
+    });
   }, [hasLoadedSavedState, state]);
 
   const completedSet = useMemo(
@@ -306,11 +334,15 @@ export default function Home() {
     setDraftDisplayName(DEFAULT_PROFILE.displayName);
     setSelectedIndex(null);
     setSelectedMissionIndex(null);
-    try {
-      window.localStorage.removeItem(STORAGE_KEY);
-    } catch (error) {
-      console.warn("Failed to reset saved progress.", error);
-    }
+    const runtimeProfile = resolveLearnerProfileFromSession(
+      state.profile,
+      DEFAULT_AUTH_STRATEGY,
+      getAuthSessionSnapshot(),
+    );
+
+    selectSavedStateRepository(runtimeProfile, {
+      localKey: STORAGE_KEY,
+    }).clear();
   }
 
   function savePractice(value: string) {

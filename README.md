@@ -19,6 +19,7 @@
 - Scenario Mission แบบ structured choice พร้อม feedback ก่อนเขียน practice note
 - Mission completion persistence พร้อม one-time mission XP หลัง quiz ผ่าน
 - Practice textarea แยกตามบทเรียนและบันทึกใน browser `localStorage`
+- Saved-state persistence abstraction เพื่อรองรับการย้ายไป backend adapter ในเฟสถัดไป
 - 30-day mission checklist
 - Reset progress
 
